@@ -2,17 +2,19 @@ package com.tchibolabs.budgettracker.feature.transactions.impl
 
 import com.tchibolabs.budgettracker.core.data.api.model.Transaction
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionKind
+import com.tchibolabs.budgettracker.core.data.api.model.TransactionOrder
+import com.tchibolabs.budgettracker.core.data.api.model.TransactionPeriod
 import com.tchibolabs.budgettracker.core.data.api.repository.TransactionRepository
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.FilterOption
-import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.SortOrder
-import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TimePeriod
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionRow
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsEvent
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsFilter
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsUiModel
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.label
 import com.tchibolabs.budgettracker.core.uisystem.api.UiAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -29,8 +31,8 @@ class TransactionsUiAdapter @Inject constructor(
     private val repository: TransactionRepository,
 ) : UiAdapter<TransactionsUiModel, TransactionsEvent>() {
 
-    private val period = MutableStateFlow(TimePeriod.Past31Days)
-    private val order = MutableStateFlow(SortOrder.AmountDescending)
+    private val period = MutableStateFlow(TransactionPeriod.PAST_31_DAYS)
+    private val order = MutableStateFlow(TransactionOrder.AMOUNT_DESC)
     private val openPickerId = MutableStateFlow<String?>(null)
     private val pendingDeleteId = MutableStateFlow<Long?>(null)
 
@@ -61,10 +63,10 @@ class TransactionsUiAdapter @Inject constructor(
             is TransactionsEvent.SelectOption -> {
                 when (event.filterId) {
                     TransactionsFilter.ID_PERIOD ->
-                        TimePeriod.values().firstOrNull { it.name == event.optionId }
+                        TransactionPeriod.values().firstOrNull { it.name == event.optionId }
                             ?.let { period.value = it }
                     TransactionsFilter.ID_ORDER ->
-                        SortOrder.values().firstOrNull { it.name == event.optionId }
+                        TransactionOrder.values().firstOrNull { it.name == event.optionId }
                             ?.let { order.value = it }
                 }
                 openPickerId.value = null
@@ -80,46 +82,54 @@ class TransactionsUiAdapter @Inject constructor(
     }
 
     private fun buildFilters(
-        currentPeriod: TimePeriod,
-        currentOrder: SortOrder,
+        currentPeriod: TransactionPeriod,
+        currentOrder: TransactionOrder,
         openId: String?,
     ): List<TransactionsFilter> = listOf(
         TransactionsFilter(
             id = TransactionsFilter.ID_PERIOD,
             label = "Time Period",
-            options = TimePeriod.values().map { FilterOption(it.name, it.label) },
+            options = TransactionPeriod.values().map { FilterOption(it.name, it.label) },
             selectedOptionId = currentPeriod.name,
             isPickerOpen = openId == TransactionsFilter.ID_PERIOD,
         ),
         TransactionsFilter(
             id = TransactionsFilter.ID_ORDER,
             label = "Order",
-            options = SortOrder.values().map { FilterOption(it.name, it.label) },
+            options = TransactionOrder.values().map { FilterOption(it.name, it.label) },
             selectedOptionId = currentOrder.name,
             isPickerOpen = openId == TransactionsFilter.ID_ORDER,
         ),
     )
 
     private fun List<Transaction>.applyFilters(
-        period: TimePeriod,
-        order: SortOrder,
+        period: TransactionPeriod,
+        order: TransactionOrder,
     ): List<Transaction> {
         val cutoff = period.cutoffMs()
         val filtered = if (cutoff == null) this else filter { it.occurredAtEpochMs >= cutoff }
         return when (order) {
-            SortOrder.AmountDescending -> filtered.sortedByDescending { it.amount }
-            SortOrder.AmountAscending -> filtered.sortedBy { it.amount }
-            SortOrder.DateNewest -> filtered.sortedByDescending { it.occurredAtEpochMs }
-            SortOrder.DateOldest -> filtered.sortedBy { it.occurredAtEpochMs }
+            TransactionOrder.AMOUNT_DESC ->
+                filtered.sortedWith(compareByDescending<Transaction> { it.amount }.thenByDescending { it.id })
+            TransactionOrder.AMOUNT_ASC ->
+                filtered.sortedWith(compareBy<Transaction> { it.amount }.thenByDescending { it.id })
+            TransactionOrder.DATE_DESC ->
+                filtered.sortedWith(compareByDescending<Transaction> { it.occurredAtEpochMs }.thenByDescending { it.id })
+            TransactionOrder.DATE_ASC ->
+                filtered.sortedWith(compareBy<Transaction> { it.occurredAtEpochMs }.thenByDescending { it.id })
         }
     }
 
-    private fun TimePeriod.cutoffMs(): Long? {
-        val day = 24L * 60 * 60 * 1000
+    private fun TransactionPeriod.cutoffMs(): Long? {
+        val zone = ZoneId.systemDefault()
+        val today = LocalDate.now(zone)
         return when (this) {
-            TimePeriod.Past7Days -> System.currentTimeMillis() - 7 * day
-            TimePeriod.Past31Days -> System.currentTimeMillis() - 31 * day
-            TimePeriod.AllTime -> null
+            TransactionPeriod.TODAY -> today.atStartOfDay(zone).toInstant().toEpochMilli()
+            TransactionPeriod.PAST_7_DAYS -> today.minusDays(7).atStartOfDay(zone).toInstant().toEpochMilli()
+            TransactionPeriod.PAST_31_DAYS -> today.minusDays(31).atStartOfDay(zone).toInstant().toEpochMilli()
+            TransactionPeriod.PAST_YEAR -> today.minusYears(1).atStartOfDay(zone).toInstant().toEpochMilli()
+            TransactionPeriod.CURRENT_MONTH -> today.withDayOfMonth(1).atStartOfDay(zone).toInstant().toEpochMilli()
+            TransactionPeriod.ALL_TIME -> null
         }
     }
 
@@ -133,7 +143,7 @@ class TransactionsUiAdapter @Inject constructor(
             note = note,
             dateLabel = date.format(dateFormatter),
             amountText = amount.formatAmount(),
-            currency = currency,
+            currency = currency.name,
             isIncome = kind == TransactionKind.Income,
         )
     }

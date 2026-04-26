@@ -2,6 +2,7 @@ package com.tchibolabs.budgettracker.core.data.impl.db
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.tchibolabs.budgettracker.core.data.api.model.Currency
 import com.tchibolabs.budgettracker.core.data.api.model.Transaction
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionKind
 
@@ -20,7 +21,7 @@ fun TransactionEntity.toDomain(): Transaction = Transaction(
     id = id,
     kind = TransactionKind.valueOf(kind),
     amount = amount,
-    currency = currency,
+    currency = runCatching { Currency.valueOf(currency) }.getOrDefault(Currency.USD),
     category = category,
     note = note,
     occurredAtEpochMs = occurredAtEpochMs,
@@ -30,7 +31,7 @@ fun Transaction.toEntity(): TransactionEntity = TransactionEntity(
     id = id,
     kind = kind.name,
     amount = amount,
-    currency = currency,
+    currency = currency.name,
     category = category,
     note = note,
     occurredAtEpochMs = occurredAtEpochMs,
