@@ -18,7 +18,8 @@
       "Bash(~/Android/Sdk/platform-tools/adb shell *)",
       "Bash(~/Android/Sdk/platform-tools/adb uninstall *)",
       "Bash(~/Android/Sdk/platform-tools/adb logcat *)",
-      "Bash(./gradlew compileDebugKotlin)"
+      "Bash(./gradlew compileDebugKotlin)",
+      "Bash(./gradlew :feature:dashboard:assembleDebug :app:assembleDebug)"
     ]
   }
 }

@@ -19,7 +19,7 @@ fun DashboardEntryPoint(
     DashboardUiComposer(
         uiModel = uiModel,
         modifier = modifier,
-        onIntervalSelected = { adapter.onEvent(it) },
+        onEvent = { adapter.onEvent(it) },
         onNavigate = onNavigate,
     )
 }
