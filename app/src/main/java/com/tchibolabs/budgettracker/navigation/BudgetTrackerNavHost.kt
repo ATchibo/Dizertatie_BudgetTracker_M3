@@ -1,5 +1,6 @@
 package com.tchibolabs.budgettracker.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,32 +14,58 @@ import com.tchibolabs.budgettracker.core.navigation.api.BudgetRoute
 import com.tchibolabs.budgettracker.core.navigation.api.BudgetTab
 import com.tchibolabs.budgettracker.feature.transactionsform.api.TransactionsFormEntryPoint
 
+private const val NO_TX_ID = Long.MIN_VALUE
+
 @Composable
 fun BudgetTrackerNavHost(contentPadding: PaddingValues) {
-    var route by rememberSaveable { mutableStateOf<BudgetRoute>(BudgetRoute.Transactions) }
+    var isFormOpen by rememberSaveable { mutableStateOf(false) }
+    var formTransactionId by rememberSaveable { mutableStateOf(NO_TX_ID) }
     var tab by rememberSaveable { mutableStateOf(BudgetTab.Transactions) }
 
     val rootModifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
 
-    when (val current = route) {
-        is BudgetRoute.TransactionsForm -> TransactionsFormEntryPoint(
+    val closeForm = {
+        isFormOpen = false
+        formTransactionId = NO_TX_ID
+        tab = BudgetTab.Transactions
+    }
+
+    if (isFormOpen) {
+        BackHandler(onBack = closeForm)
+        TransactionsFormEntryPoint(
             modifier = rootModifier,
-            transactionId = current.transactionId,
+            transactionId = if (formTransactionId == NO_TX_ID) null else formTransactionId,
             onNavigate = { target ->
-                route = if (target is BudgetRoute.TransactionsForm) target else BudgetRoute.Transactions
-                if (target is BudgetRoute.Dashboard) tab = BudgetTab.Dashboard
-                if (target is BudgetRoute.Transactions) tab = BudgetTab.Transactions
+                when (target) {
+                    is BudgetRoute.TransactionsForm -> {
+                        formTransactionId = target.transactionId ?: NO_TX_ID
+                    }
+                    BudgetRoute.Dashboard -> {
+                        tab = BudgetTab.Dashboard
+                        isFormOpen = false
+                        formTransactionId = NO_TX_ID
+                    }
+                    BudgetRoute.Transactions, BudgetRoute.Home -> {
+                        tab = BudgetTab.Transactions
+                        isFormOpen = false
+                        formTransactionId = NO_TX_ID
+                    }
+                }
             },
         )
-        else -> TabbedShell(
+    } else {
+        TabbedShell(
             modifier = rootModifier,
             selectedTab = tab,
             onSelectTab = { tab = it },
             onNavigate = { target ->
                 when (target) {
-                    is BudgetRoute.TransactionsForm -> route = target
+                    is BudgetRoute.TransactionsForm -> {
+                        formTransactionId = target.transactionId ?: NO_TX_ID
+                        isFormOpen = true
+                    }
                     BudgetRoute.Dashboard -> tab = BudgetTab.Dashboard
                     BudgetRoute.Transactions -> tab = BudgetTab.Transactions
                     BudgetRoute.Home -> Unit

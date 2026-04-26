@@ -1,8 +1,9 @@
 package com.tchibolabs.budgettracker.feature.transactionsform.impl
 
 import com.tchibolabs.budgettracker.core.data.api.model.Transaction
-import com.tchibolabs.budgettracker.core.data.api.model.TransactionKind
 import com.tchibolabs.budgettracker.core.data.api.repository.TransactionRepository
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactionsform.TransactionsFormEvent
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactionsform.TransactionsFormUiModel
 import com.tchibolabs.budgettracker.core.uisystem.api.UiAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -11,15 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-sealed interface TransactionsFormEvent {
-    data class KindChanged(val kind: TransactionKind) : TransactionsFormEvent
-    data class AmountChanged(val text: String) : TransactionsFormEvent
-    data class CurrencyChanged(val currency: String) : TransactionsFormEvent
-    data class CategoryChanged(val category: String) : TransactionsFormEvent
-    data class NoteChanged(val note: String) : TransactionsFormEvent
-    data object Save : TransactionsFormEvent
-}
 
 @HiltViewModel
 class TransactionsFormUiAdapter @Inject constructor(

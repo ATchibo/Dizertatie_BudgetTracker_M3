@@ -3,6 +3,13 @@ package com.tchibolabs.budgettracker.feature.transactions.impl
 import com.tchibolabs.budgettracker.core.data.api.model.Transaction
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionKind
 import com.tchibolabs.budgettracker.core.data.api.repository.TransactionRepository
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.FilterOption
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.SortOrder
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TimePeriod
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionRow
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsEvent
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsFilter
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsUiModel
 import com.tchibolabs.budgettracker.core.uisystem.api.UiAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
@@ -17,12 +24,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-sealed interface TransactionsEvent {
-    data object CyclePeriod : TransactionsEvent
-    data object CycleOrder : TransactionsEvent
-    data class Delete(val id: Long) : TransactionsEvent
-}
-
 @HiltViewModel
 class TransactionsUiAdapter @Inject constructor(
     private val repository: TransactionRepository,
@@ -30,6 +31,8 @@ class TransactionsUiAdapter @Inject constructor(
 
     private val period = MutableStateFlow(TimePeriod.Past31Days)
     private val order = MutableStateFlow(SortOrder.AmountDescending)
+    private val openPickerId = MutableStateFlow<String?>(null)
+    private val pendingDeleteId = MutableStateFlow<Long?>(null)
 
     private val dateFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault())
@@ -38,22 +41,64 @@ class TransactionsUiAdapter @Inject constructor(
         repository.observeAll(),
         period,
         order,
-    ) { all, currentPeriod, currentOrder ->
+        openPickerId,
+        pendingDeleteId,
+    ) { all, currentPeriod, currentOrder, openId, deleteId ->
         TransactionsUiModel(
             rows = all.applyFilters(currentPeriod, currentOrder).map { it.toRow() },
-            period = currentPeriod,
-            order = currentOrder,
+            filters = buildFilters(currentPeriod, currentOrder, openId),
+            pendingDeleteId = deleteId,
             isLoading = false,
         )
     }.stateIn(scope, SharingStarted.WhileSubscribed(5_000), TransactionsUiModel.Initial)
 
     override fun onEvent(event: TransactionsEvent) {
         when (event) {
-            TransactionsEvent.CyclePeriod -> period.value = period.value.next()
-            TransactionsEvent.CycleOrder -> order.value = order.value.next()
-            is TransactionsEvent.Delete -> scope.launch { repository.delete(event.id) }
+            is TransactionsEvent.OpenPicker -> openPickerId.value = event.filterId
+            is TransactionsEvent.ClosePicker -> {
+                if (openPickerId.value == event.filterId) openPickerId.value = null
+            }
+            is TransactionsEvent.SelectOption -> {
+                when (event.filterId) {
+                    TransactionsFilter.ID_PERIOD ->
+                        TimePeriod.values().firstOrNull { it.name == event.optionId }
+                            ?.let { period.value = it }
+                    TransactionsFilter.ID_ORDER ->
+                        SortOrder.values().firstOrNull { it.name == event.optionId }
+                            ?.let { order.value = it }
+                }
+                openPickerId.value = null
+            }
+            is TransactionsEvent.RequestDelete -> pendingDeleteId.value = event.id
+            TransactionsEvent.CancelDelete -> pendingDeleteId.value = null
+            TransactionsEvent.ConfirmDelete -> {
+                val id = pendingDeleteId.value ?: return
+                pendingDeleteId.value = null
+                scope.launch { repository.delete(id) }
+            }
         }
     }
+
+    private fun buildFilters(
+        currentPeriod: TimePeriod,
+        currentOrder: SortOrder,
+        openId: String?,
+    ): List<TransactionsFilter> = listOf(
+        TransactionsFilter(
+            id = TransactionsFilter.ID_PERIOD,
+            label = "Time Period",
+            options = TimePeriod.values().map { FilterOption(it.name, it.label) },
+            selectedOptionId = currentPeriod.name,
+            isPickerOpen = openId == TransactionsFilter.ID_PERIOD,
+        ),
+        TransactionsFilter(
+            id = TransactionsFilter.ID_ORDER,
+            label = "Order",
+            options = SortOrder.values().map { FilterOption(it.name, it.label) },
+            selectedOptionId = currentOrder.name,
+            isPickerOpen = openId == TransactionsFilter.ID_ORDER,
+        ),
+    )
 
     private fun List<Transaction>.applyFilters(
         period: TimePeriod,
@@ -76,16 +121,6 @@ class TransactionsUiAdapter @Inject constructor(
             TimePeriod.Past31Days -> System.currentTimeMillis() - 31 * day
             TimePeriod.AllTime -> null
         }
-    }
-
-    private fun TimePeriod.next(): TimePeriod {
-        val all = TimePeriod.values()
-        return all[(ordinal + 1) % all.size]
-    }
-
-    private fun SortOrder.next(): SortOrder {
-        val all = SortOrder.values()
-        return all[(ordinal + 1) % all.size]
     }
 
     private fun Transaction.toRow(): TransactionRow {

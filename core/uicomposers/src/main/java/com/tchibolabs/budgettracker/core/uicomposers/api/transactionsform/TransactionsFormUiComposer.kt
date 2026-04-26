@@ -1,4 +1,4 @@
-package com.tchibolabs.budgettracker.feature.transactionsform.impl
+package com.tchibolabs.budgettracker.core.uicomposers.api.transactionsform
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,7 +21,7 @@ import com.tchibolabs.budgettracker.core.design.api.components.BudgetTopAppBar
 import com.tchibolabs.budgettracker.core.design.api.theme.BudgetTrackerTheme
 
 @Composable
-internal fun TransactionsFormUiComposer(
+fun TransactionsFormUiComposer(
     uiModel: TransactionsFormUiModel,
     modifier: Modifier = Modifier,
     onEvent: (TransactionsFormEvent) -> Unit,

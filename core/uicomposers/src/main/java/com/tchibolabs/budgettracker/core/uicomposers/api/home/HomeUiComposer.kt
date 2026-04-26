@@ -1,4 +1,4 @@
-package com.tchibolabs.budgettracker.feature.home.impl
+package com.tchibolabs.budgettracker.core.uicomposers.api.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,7 +16,7 @@ import com.tchibolabs.budgettracker.core.design.api.theme.BudgetTrackerTheme
 import com.tchibolabs.budgettracker.core.navigation.api.BudgetRoute
 
 @Composable
-internal fun HomeUiComposer(
+fun HomeUiComposer(
     uiModel: HomeUiModel,
     modifier: Modifier = Modifier,
     onNavigate: (BudgetRoute) -> Unit,
@@ -24,8 +24,7 @@ internal fun HomeUiComposer(
     Column(modifier = modifier.fillMaxSize()) {
         BudgetTopAppBar(title = "Home")
         Column(
-            modifier = Modifier
-                .padding(16.dp),
+            modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
@@ -54,12 +53,7 @@ internal fun HomeUiComposer(
 private fun HomeUiComposerPreview() {
     BudgetTrackerTheme {
         HomeUiComposer(
-            uiModel = HomeUiModel(
-                totalBalance = 1234.56,
-                displayCurrency = "USD",
-                recentTransactionCount = 12,
-                isLoading = false,
-            ),
+            uiModel = HomeUiModel(1234.56, "USD", 12, false),
             onNavigate = {},
         )
     }

@@ -1,4 +1,4 @@
-package com.tchibolabs.budgettracker.feature.transactionsform.impl
+package com.tchibolabs.budgettracker.core.uicomposers.api.transactionsform
 
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionKind
 import com.tchibolabs.budgettracker.core.uisystem.api.UiModel
@@ -28,4 +28,13 @@ data class TransactionsFormUiModel(
             saved = false,
         )
     }
+}
+
+sealed interface TransactionsFormEvent {
+    data class KindChanged(val kind: TransactionKind) : TransactionsFormEvent
+    data class AmountChanged(val text: String) : TransactionsFormEvent
+    data class CurrencyChanged(val currency: String) : TransactionsFormEvent
+    data class CategoryChanged(val category: String) : TransactionsFormEvent
+    data class NoteChanged(val note: String) : TransactionsFormEvent
+    data object Save : TransactionsFormEvent
 }

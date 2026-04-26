@@ -16,7 +16,8 @@
       "Bash(~/Android/Sdk/platform-tools/adb devices *)",
       "Bash(./gradlew :app:installDebug --no-daemon)",
       "Bash(~/Android/Sdk/platform-tools/adb shell *)",
-      "Bash(~/Android/Sdk/platform-tools/adb uninstall *)"
+      "Bash(~/Android/Sdk/platform-tools/adb uninstall *)",
+      "Bash(~/Android/Sdk/platform-tools/adb logcat *)"
     ]
   }
 }

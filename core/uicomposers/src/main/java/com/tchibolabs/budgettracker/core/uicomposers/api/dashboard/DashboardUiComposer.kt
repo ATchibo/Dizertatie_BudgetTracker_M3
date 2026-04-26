@@ -1,8 +1,9 @@
-package com.tchibolabs.budgettracker.feature.dashboard.impl
+package com.tchibolabs.budgettracker.core.uicomposers.api.dashboard
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -23,11 +24,11 @@ import com.tchibolabs.budgettracker.core.design.api.theme.BudgetTrackerTheme
 import com.tchibolabs.budgettracker.core.navigation.api.BudgetRoute
 
 @Composable
-internal fun DashboardUiComposer(
+fun DashboardUiComposer(
     uiModel: DashboardUiModel,
     modifier: Modifier = Modifier,
     onIntervalSelected: (DashboardEvent) -> Unit,
-    onNavigate: (BudgetRoute) -> Unit,
+    @Suppress("UNUSED_PARAMETER") onNavigate: (BudgetRoute) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -35,31 +36,19 @@ internal fun DashboardUiComposer(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            IntervalRow(
-                selected = uiModel.interval,
-                onSelect = { onIntervalSelected(DashboardEvent.IntervalSelected(it)) },
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center,
-            ) {
-                PieChart(
-                    slices = uiModel.slices,
-                    modifier = Modifier.size(220.dp),
+        IntervalRow(
+            selected = uiModel.interval,
+            onSelect = { onIntervalSelected(DashboardEvent.IntervalSelected(it)) },
+        )
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            PieChart(slices = uiModel.slices, modifier = Modifier.size(220.dp))
+        }
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(uiModel.breakdown, key = { it.category }) { row ->
+                Text(
+                    text = "${row.category} — %.2f".format(row.totalAmount),
+                    style = MaterialTheme.typography.bodyLarge,
                 )
-            }
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(uiModel.breakdown, key = { it.category }) { row ->
-                    Text(
-                        text = "${row.category} — %.2f".format(row.totalAmount),
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                }
             }
         }
     }
@@ -72,9 +61,7 @@ private fun IntervalRow(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("Interval", style = MaterialTheme.typography.labelLarge)
-        androidx.compose.foundation.layout.Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             DashboardInterval.values().forEach { interval ->
                 FilterChip(
                     selected = interval == selected,

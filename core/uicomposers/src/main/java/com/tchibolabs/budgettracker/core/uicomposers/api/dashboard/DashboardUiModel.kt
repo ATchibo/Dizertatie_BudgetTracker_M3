@@ -1,4 +1,4 @@
-package com.tchibolabs.budgettracker.feature.dashboard.impl
+package com.tchibolabs.budgettracker.core.uicomposers.api.dashboard
 
 import androidx.compose.ui.graphics.Color
 import com.tchibolabs.budgettracker.core.design.api.components.PieSlice
@@ -29,4 +29,8 @@ data class DashboardUiModel(
             isLoading = true,
         )
     }
+}
+
+sealed interface DashboardEvent {
+    data class IntervalSelected(val interval: DashboardInterval) : DashboardEvent
 }

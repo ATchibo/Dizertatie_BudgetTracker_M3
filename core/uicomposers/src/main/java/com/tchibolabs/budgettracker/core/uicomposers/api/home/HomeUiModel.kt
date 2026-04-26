@@ -1,4 +1,4 @@
-package com.tchibolabs.budgettracker.feature.home.impl
+package com.tchibolabs.budgettracker.core.uicomposers.api.home
 
 import com.tchibolabs.budgettracker.core.uisystem.api.UiModel
 
@@ -16,4 +16,8 @@ data class HomeUiModel(
             isLoading = true,
         )
     }
+}
+
+sealed interface HomeEvent {
+    data object Refresh : HomeEvent
 }

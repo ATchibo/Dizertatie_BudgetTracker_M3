@@ -4,6 +4,10 @@ import androidx.compose.ui.graphics.Color
 import com.tchibolabs.budgettracker.core.data.api.model.Transaction
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionKind
 import com.tchibolabs.budgettracker.core.data.api.repository.TransactionRepository
+import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.CategoryBreakdown
+import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.DashboardEvent
+import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.DashboardInterval
+import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.DashboardUiModel
 import com.tchibolabs.budgettracker.core.uisystem.api.UiAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -12,10 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-sealed interface DashboardEvent {
-    data class IntervalSelected(val interval: DashboardInterval) : DashboardEvent
-}
 
 @HiltViewModel
 class DashboardUiAdapter @Inject constructor(
