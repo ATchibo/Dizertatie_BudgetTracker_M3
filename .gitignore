@@ -1,30 +1,84 @@
-# Built variants
+# Gradle
+.gradle/
 **/build/
 /build
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/**/build/
+!**/src/**/*.gradle*
 
-# Android Studio / IntelliJ
-*.iml
-.idea/
-.gradle/
+# Android
+*.apk
+*.aab
+*.ap_
+*.dex
 local.properties
 /captures/
 .externalNativeBuild/
 .cxx/
+release/
+proguard/
+
+# Android Studio / IntelliJ / JetBrains
+*.iml
+*.ipr
+*.iws
+.idea/
+out/
 
 # Kotlin
 .kotlin/
 
+# Java
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+hs_err_pid*
+replay_pid*
+
+# KSP / KAPT generated
+**/generated/
+**/kapt/
+**/ksp/
+
+# Logs
+*.log
+
 # OS specific
 .DS_Store
 Thumbs.db
+ehthumbs.db
+desktop.ini
 
-# Signing files
+# Editor
+*.swp
+*.swo
+*~
+.vscode/
+.fleet/
+.nb-gradle/
+
+# Signing / secrets
 *.jks
 *.keystore
 *.p12
+*.pem
+*.crt
+secrets.properties
+keystore.properties
 
-# Google Services
+# Google Services (uncomment if not committing)
 # google-services.json
 
-# Secrets
-secrets.properties
+# Test / coverage reports
+**/test-results/
+**/reports/
+**/coverage/
+*.exec
+
+# Profiling
+**/profile/
+**/baseline-prof.txt.bak
+
+# Misc
+*.bak
+*.tmp
