@@ -1,0 +1,30 @@
+# Built variants
+**/build/
+/build
+
+# Android Studio / IntelliJ
+*.iml
+.idea/
+.gradle/
+local.properties
+/captures/
+.externalNativeBuild/
+.cxx/
+
+# Kotlin
+.kotlin/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Signing files
+*.jks
+*.keystore
+*.p12
+
+# Google Services
+# google-services.json
+
+# Secrets
+secrets.properties

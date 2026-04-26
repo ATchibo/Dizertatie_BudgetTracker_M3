@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//home/tchibo/AndroidStudioProjects/BudgetTrackerAssisted/**)",
+      "Read(//home/tchibo/AndroidStudioProjects/BudgetTrackerAssisted/gradle/wrapper/**)",
+      "Bash(cp ~/AndroidStudioProjects/BudgetTrackerAssisted/gradle/wrapper/gradle-wrapper.jar /home/tchibo/AndroidStudioProjects/BudgetTrackerFull/gradle/wrapper/gradle-wrapper.jar)",
+      "Bash(cp ~/AndroidStudioProjects/BudgetTrackerAssisted/gradle/wrapper/gradle-wrapper.properties /home/tchibo/AndroidStudioProjects/BudgetTrackerFull/gradle/wrapper/gradle-wrapper.properties)",
+      "Bash(cp ~/AndroidStudioProjects/BudgetTrackerAssisted/gradlew /home/tchibo/AndroidStudioProjects/BudgetTrackerFull/gradlew)",
+      "Bash(cp ~/AndroidStudioProjects/BudgetTrackerAssisted/gradlew.bat /home/tchibo/AndroidStudioProjects/BudgetTrackerFull/gradlew.bat)",
+      "Bash(chmod +x /home/tchibo/AndroidStudioProjects/BudgetTrackerFull/gradlew)",
+      "Bash(cp ~/AndroidStudioProjects/BudgetTrackerAssisted/gradle/wrapper/gradle-wrapper.jar /home/tchibo/AndroidStudioProjects/BudgetTrackerFull/gradle/wrapper/)",
+      "Bash(cp ~/AndroidStudioProjects/BudgetTrackerAssisted/gradle/wrapper/gradle-wrapper.properties /home/tchibo/AndroidStudioProjects/BudgetTrackerFull/gradle/wrapper/)",
+      "Bash(cp ~/AndroidStudioProjects/BudgetTrackerAssisted/.gitignore /home/tchibo/AndroidStudioProjects/BudgetTrackerFull/.gitignore)",
+      "Bash(./gradlew :app:assembleDebug --no-daemon)",
+      "Bash(python3 -c ' *)",
+      "Bash(~/Android/Sdk/platform-tools/adb devices *)",
+      "Bash(./gradlew :app:installDebug --no-daemon)",
+      "Bash(~/Android/Sdk/platform-tools/adb shell *)",
+      "Bash(~/Android/Sdk/platform-tools/adb uninstall *)"
+    ]
+  }
+}
