@@ -29,6 +29,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Dependency Injection:** Dagger Hilt.
 - **Local Storage:** Room Database.
 - **Networking:** Retrofit & OkHttp.
+- **Build automation:** Gradle. 
 
 ## Project Architecture & Modularization (Strict Rules)
 This project uses a strict multi-module architecture to enforce separation of concerns:
