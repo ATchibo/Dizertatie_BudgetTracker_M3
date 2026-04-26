@@ -17,7 +17,8 @@
       "Bash(./gradlew :app:installDebug --no-daemon)",
       "Bash(~/Android/Sdk/platform-tools/adb shell *)",
       "Bash(~/Android/Sdk/platform-tools/adb uninstall *)",
-      "Bash(~/Android/Sdk/platform-tools/adb logcat *)"
+      "Bash(~/Android/Sdk/platform-tools/adb logcat *)",
+      "Bash(./gradlew compileDebugKotlin)"
     ]
   }
 }
