@@ -17,7 +17,7 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 @InstallIn(SingletonComponent::class)
 internal object RemoteModule {
 
-    private const val BASE_URL = "https://open.er-api.com/"
+    private const val BASE_URL = "https://api.frankfurter.dev/"
 
     @Provides
     @Singleton

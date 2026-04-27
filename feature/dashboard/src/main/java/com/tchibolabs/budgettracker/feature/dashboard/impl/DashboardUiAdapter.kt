@@ -21,7 +21,10 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -38,6 +41,11 @@ class DashboardUiAdapter @Inject constructor(
     private val currency = MutableStateFlow(Currency.RON)
     private val currencyMode = MutableStateFlow(CurrencyMode.SELECTED_ONLY)
     private val openPickerId = MutableStateFlow<String?>(null)
+    private val isRefreshing = MutableStateFlow(false)
+    private val refreshCount = MutableStateFlow(0)
+
+    private val _conversionError = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val conversionError: SharedFlow<Unit> = _conversionError
 
     private val palette = listOf(
         Color(0xFF42A5F5),
@@ -54,14 +62,21 @@ class DashboardUiAdapter @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val uiModel: StateFlow<DashboardUiModel> = combine(
-        transactions.observeAll(),
-        period,
-        currency,
-        currencyMode,
-        openPickerId,
-    ) { all, p, c, mode, openId ->
-        Inputs(all = all, period = p, currency = c, mode = mode, openId = openId)
-    }.mapLatest { compute(it) }
+        combine(
+            transactions.observeAll(),
+            period,
+            currency,
+            currencyMode,
+            openPickerId,
+        ) { all, p, c, mode, openId ->
+            Inputs(all = all, period = p, currency = c, mode = mode, openId = openId)
+        },
+        refreshCount,
+    ) { inputs, _ -> inputs }
+        .mapLatest { compute(it) }
+        .combine(isRefreshing) { model, refreshing ->
+            model.copy(isRefreshing = refreshing)
+        }
         .stateIn(scope, SharingStarted.WhileSubscribed(5_000), DashboardUiModel.Initial)
 
     override fun onEvent(event: DashboardEvent) {
@@ -84,15 +99,24 @@ class DashboardUiAdapter @Inject constructor(
                 }
                 openPickerId.value = null
             }
+            is DashboardEvent.Refresh -> scope.launch {
+                isRefreshing.value = true
+                Currency.values()
+                    .filter { it != currency.value }
+                    .forEach { rates.refresh(it.name) }
+                refreshCount.value++
+                isRefreshing.value = false
+            }
         }
     }
 
     private suspend fun compute(inputs: Inputs): DashboardUiModel {
         val cutoff = inputs.period.cutoffMs()
         val withinPeriod = inputs.all.filter { cutoff == null || it.occurredAtEpochMs >= cutoff }
+        val effectiveMode = ensureRates(inputs, withinPeriod)
 
         val resolved = withinPeriod.mapNotNull { tx ->
-            val resolvedAmount = when (inputs.mode) {
+            val resolvedAmount = when (effectiveMode) {
                 CurrencyMode.SELECTED_ONLY ->
                     if (tx.currency == inputs.currency) tx.amount else null
                 CurrencyMode.ALL_CONVERTED ->
@@ -119,7 +143,7 @@ class DashboardUiAdapter @Inject constructor(
         return DashboardUiModel(
             period = inputs.period,
             currency = inputs.currency,
-            currencyMode = inputs.mode,
+            currencyMode = effectiveMode,
             totalIncome = totalIncome,
             totalCosts = totalCosts,
             totalBalance = totalIncome - totalCosts,
@@ -129,7 +153,26 @@ class DashboardUiAdapter @Inject constructor(
             topCosts = topCosts,
             openPickerId = inputs.openId,
             isLoading = false,
+            isRefreshing = false,
         )
+    }
+
+    private suspend fun ensureRates(inputs: Inputs, transactions: List<Transaction>): CurrencyMode {
+        if (inputs.mode != CurrencyMode.ALL_CONVERTED) return inputs.mode
+
+        val uniqueSources = transactions.map { it.currency.name }.distinct()
+            .filter { it != inputs.currency.name }
+
+        for (source in uniqueSources) {
+            if (rates.convert(1.0, source, inputs.currency.name) == null) {
+                if (rates.refresh(source).isFailure) {
+                    currencyMode.value = CurrencyMode.SELECTED_ONLY
+                    _conversionError.tryEmit(Unit)
+                    return CurrencyMode.SELECTED_ONLY
+                }
+            }
+        }
+        return CurrencyMode.ALL_CONVERTED
     }
 
     private fun List<Pair<Transaction, Double>>.toBreakdown(): List<CategoryBreakdown> =

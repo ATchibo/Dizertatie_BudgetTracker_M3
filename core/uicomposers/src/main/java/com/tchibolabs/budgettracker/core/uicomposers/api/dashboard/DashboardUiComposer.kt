@@ -14,10 +14,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +36,7 @@ import com.tchibolabs.budgettracker.core.design.api.components.PieChart
 import com.tchibolabs.budgettracker.core.design.api.theme.BudgetTrackerTheme
 import com.tchibolabs.budgettracker.core.navigation.api.BudgetRoute
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardUiComposer(
     uiModel: DashboardUiModel,
@@ -41,7 +44,11 @@ fun DashboardUiComposer(
     onEvent: (DashboardEvent) -> Unit,
     @Suppress("UNUSED_PARAMETER") onNavigate: (BudgetRoute) -> Unit,
 ) {
-    Box(modifier = modifier.fillMaxSize()) {
+    PullToRefreshBox(
+        isRefreshing = uiModel.isRefreshing,
+        onRefresh = { onEvent(DashboardEvent.Refresh) },
+        modifier = modifier.fillMaxSize(),
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
@@ -88,37 +95,60 @@ fun DashboardUiComposer(
             item {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
-            item {
-                CategorySection(title = "Costs by category") {
-                    CostsDonut(uiModel = uiModel)
-                    BreakdownLegend(breakdown = uiModel.costsBreakdown)
+            if (uiModel.costsBreakdown.isNotEmpty()) {
+                item {
+                    CategorySection(title = "Costs by category") {
+                        CostsDonut(uiModel = uiModel)
+                        BreakdownLegend(breakdown = uiModel.costsBreakdown)
+                    }
                 }
             }
-            if (uiModel.topCosts.isNotEmpty()) {
+            item {
+                Text(
+                    text = "Top 5 Costs",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+            if (uiModel.topCosts.isEmpty()) {
                 item {
                     Text(
-                        text = "Top 5 Costs",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onBackground,
+                        text = "No transactions found",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+            } else {
                 items(uiModel.topCosts, key = { "cost-${it.id}" }) { row ->
                     DashboardTransactionRowCard(row = row)
                 }
             }
             item {
-                CategorySection(title = "Income by category") {
-                    IncomePie(uiModel = uiModel)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            }
+            if (uiModel.incomeBreakdown.isNotEmpty()) {
+                item {
+                    CategorySection(title = "Income by category") {
+                        IncomePie(uiModel = uiModel)
+                    }
                 }
             }
-            if (uiModel.topIncome.isNotEmpty()) {
+            item {
+                Text(
+                    text = "Top 5 Income",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+            if (uiModel.topIncome.isEmpty()) {
                 item {
                     Text(
-                        text = "Top 5 Income",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onBackground,
+                        text = "No transactions found",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+            } else {
                 items(uiModel.topIncome, key = { "income-${it.id}" }) { row ->
                     DashboardTransactionRowCard(row = row)
                 }
@@ -210,28 +240,7 @@ private fun CostsDonut(uiModel: DashboardUiModel) {
         PieChart(
             slices = uiModel.costsSlices,
             modifier = Modifier.size(260.dp),
-            strokeWidth = 56.dp,
-        ) {
-            uiModel.highlightedCost?.let { highlight ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = highlight.category.uppercase(),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        text = highlight.totalAmount.formatAmount(),
-                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        text = "%.1f%%".format(highlight.share * 100f),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-        }
+        )
     }
 }
 
@@ -371,6 +380,7 @@ private fun DashboardUiComposerPreview() {
                 ),
                 openPickerId = null,
                 isLoading = false,
+                isRefreshing = false,
             ),
             onEvent = {},
             onNavigate = {},

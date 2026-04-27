@@ -51,6 +51,7 @@ data class DashboardUiModel(
     val topCosts: List<DashboardTransactionRow>,
     val openPickerId: String?,
     val isLoading: Boolean,
+    val isRefreshing: Boolean,
 ) : UiModel {
     val displayCurrency: String get() = currency.name
 
@@ -59,13 +60,6 @@ data class DashboardUiModel(
 
     val incomeSlices: List<PieSlice>
         get() = incomeBreakdown.toSlices()
-
-    val highlightedCost: HighlightedCategory?
-        get() = costsBreakdown.firstOrNull()?.let {
-            val total = costsBreakdown.sumOf { row -> row.totalAmount }
-            val percent = if (total > 0.0) (it.totalAmount / total).toFloat() else 0f
-            HighlightedCategory(category = it.category, totalAmount = it.totalAmount, share = percent)
-        }
 
     private fun List<CategoryBreakdown>.toSlices(): List<PieSlice> = map {
         PieSlice(label = it.category, value = it.totalAmount.toFloat(), color = it.color)
@@ -89,18 +83,14 @@ data class DashboardUiModel(
             topCosts = emptyList(),
             openPickerId = null,
             isLoading = true,
+            isRefreshing = false,
         )
     }
 }
-
-data class HighlightedCategory(
-    val category: String,
-    val totalAmount: Double,
-    val share: Float,
-)
 
 sealed interface DashboardEvent {
     data class OpenPicker(val pickerId: String) : DashboardEvent
     data class ClosePicker(val pickerId: String) : DashboardEvent
     data class SelectOption(val pickerId: String, val optionId: String) : DashboardEvent
+    data object Refresh : DashboardEvent
 }
