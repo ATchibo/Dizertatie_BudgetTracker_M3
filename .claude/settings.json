@@ -18,7 +18,21 @@
       "Bash(~/Android/Sdk/platform-tools/adb shell *)",
       "Bash(~/Android/Sdk/platform-tools/adb uninstall *)",
       "Bash(~/Android/Sdk/platform-tools/adb logcat *)",
-      "Bash(./gradlew compileDebugKotlin)"
+      "Bash(./gradlew compileDebugKotlin)",
+      "Bash(./gradlew :feature:dashboard:assembleDebug :app:assembleDebug)",
+      "Bash(./gradlew :core:design:compileDebugKotlin)",
+      "Bash(./gradlew :core:uicomposers:compileDebugKotlin)",
+      "Bash(./gradlew :core:uicomposers:compileDebugKotlin :feature:dashboard:compileDebugKotlin)",
+      "Bash(./gradlew :core:design:compileDebugKotlin :core:uicomposers:compileDebugKotlin :feature:dashboard:compileDebugKotlin)",
+      "Bash(./gradlew :core:remote:compileDebugKotlin :feature:dashboard:compileDebugKotlin)",
+      "Bash(./gradlew :core:remote:compileDebugKotlin :core:data:compileDebugKotlin :feature:dashboard:compileDebugKotlin)",
+      "Bash(./gradlew :core:data:compileDebugKotlin :feature:dashboard:compileDebugKotlin)",
+      "Bash(xargs cat *)",
+      "Bash(curl -s \"https://api.frankfurter.app/latest?from=USD&to=EUR,RON\")",
+      "Bash(curl -sv \"https://api.frankfurter.app/latest?from=USD&to=EUR,RON\")",
+      "Bash(curl -s 'https://api.frankfurter.app/latest?from=USD&to=EUR,RON')",
+      "Bash(curl -w \"\\\\n%{http_code}\" 'https://api.frankfurter.app/latest?from=USD&to=EUR,RON')",
+      "Bash(curl -v -L 'https://api.frankfurter.app/latest?from=USD&to=EUR,RON')"
     ]
   }
 }

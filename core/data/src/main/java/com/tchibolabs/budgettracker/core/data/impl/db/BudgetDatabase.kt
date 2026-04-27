@@ -4,11 +4,10 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [TransactionEntity::class, ExchangeRateEntity::class],
-    version = 1,
+    entities = [TransactionEntity::class],
+    version = 2,
     exportSchema = false,
 )
 abstract class BudgetDatabase : RoomDatabase() {
     abstract fun transactionDao(): TransactionDao
-    abstract fun exchangeRateDao(): ExchangeRateDao
 }
