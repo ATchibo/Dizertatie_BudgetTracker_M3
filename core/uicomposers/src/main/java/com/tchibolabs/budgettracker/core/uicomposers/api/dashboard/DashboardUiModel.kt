@@ -1,9 +1,10 @@
-package com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers
+package com.tchibolabs.budgettracker.core.uicomposers.api.dashboard
 
 import androidx.compose.ui.graphics.Color
 import com.tchibolabs.budgettracker.core.data.api.model.Currency
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionPeriod
 import com.tchibolabs.budgettracker.core.design.api.components.PieSlice
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionRow
 import com.tchibolabs.budgettracker.core.uisystem.api.UiModel
 
 enum class CurrencyMode { SELECTED_ONLY, ALL_CONVERTED }
@@ -30,14 +31,6 @@ data class CategoryBreakdown(
     val color: Color,
 )
 
-data class DashboardTransactionRow(
-    val id: Long,
-    val category: String,
-    val dateLabel: String,
-    val amountText: String,
-    val currency: String,
-)
-
 data class DashboardUiModel(
     val period: TransactionPeriod,
     val currency: Currency,
@@ -47,8 +40,8 @@ data class DashboardUiModel(
     val totalBalance: Double,
     val costsBreakdown: List<CategoryBreakdown>,
     val incomeBreakdown: List<CategoryBreakdown>,
-    val topIncome: List<DashboardTransactionRow>,
-    val topCosts: List<DashboardTransactionRow>,
+    val topIncome: List<TransactionRow>,
+    val topCosts: List<TransactionRow>,
     val openPickerId: String?,
     val isLoading: Boolean,
     val isRefreshing: Boolean,

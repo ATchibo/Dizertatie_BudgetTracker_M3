@@ -1,4 +1,4 @@
-package com.tchibolabs.budgettracker.feature.transactions.api.uicomposers
+package com.tchibolabs.budgettracker.core.uicomposers.api.transactions
 
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionOrder
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionPeriod
@@ -21,16 +21,6 @@ val TransactionOrder.label: String
         TransactionOrder.AMOUNT_ASC -> "Amount (Ascending)"
         TransactionOrder.AMOUNT_DESC -> "Amount (Descending)"
     }
-
-data class TransactionRow(
-    val id: Long,
-    val category: String,
-    val note: String?,
-    val dateLabel: String,
-    val amountText: String,
-    val currency: String,
-    val isIncome: Boolean,
-)
 
 data class FilterOption(
     val id: String,

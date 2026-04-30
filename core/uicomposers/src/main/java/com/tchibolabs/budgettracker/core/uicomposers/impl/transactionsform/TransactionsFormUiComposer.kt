@@ -1,4 +1,4 @@
-package com.tchibolabs.budgettracker.feature.transactionsform.impl.uicomposers
+package com.tchibolabs.budgettracker.core.uicomposers.impl.transactionsform
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,9 +34,9 @@ import com.tchibolabs.budgettracker.core.design.api.components.FilterChipCard
 import com.tchibolabs.budgettracker.core.design.api.components.OptionsBottomSheet
 import com.tchibolabs.budgettracker.core.design.api.components.PickerOption
 import com.tchibolabs.budgettracker.core.design.api.theme.BudgetTrackerTheme
-import com.tchibolabs.budgettracker.feature.transactionsform.api.uicomposers.TransactionCategory
-import com.tchibolabs.budgettracker.feature.transactionsform.api.uicomposers.TransactionsFormEvent
-import com.tchibolabs.budgettracker.feature.transactionsform.api.uicomposers.TransactionsFormUiModel
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactionsform.TransactionCategory
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactionsform.TransactionsFormEvent
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactionsform.TransactionsFormUiModel
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter

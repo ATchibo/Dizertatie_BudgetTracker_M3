@@ -1,4 +1,4 @@
-package com.tchibolabs.budgettracker.feature.home.impl.uicomposers
+package com.tchibolabs.budgettracker.core.uicomposers.impl.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.tchibolabs.budgettracker.core.design.api.components.BudgetTopAppBar
 import com.tchibolabs.budgettracker.core.design.api.theme.BudgetTrackerTheme
 import com.tchibolabs.budgettracker.core.navigation.api.BudgetRoute
-import com.tchibolabs.budgettracker.feature.home.api.uicomposers.HomeUiModel
+import com.tchibolabs.budgettracker.core.uicomposers.api.home.HomeUiModel
 
 @Composable
 fun HomeUiComposer(

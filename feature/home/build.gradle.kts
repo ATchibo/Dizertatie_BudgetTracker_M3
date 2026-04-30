@@ -24,6 +24,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:uicomposers"))
     implementation(project(":core:uisystem"))
     implementation(project(":core:design"))
     implementation(project(":core:navigation"))

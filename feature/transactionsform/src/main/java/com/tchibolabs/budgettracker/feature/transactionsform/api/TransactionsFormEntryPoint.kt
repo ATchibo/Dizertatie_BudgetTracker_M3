@@ -7,8 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tchibolabs.budgettracker.core.navigation.api.BudgetRoute
-import com.tchibolabs.budgettracker.feature.transactionsform.impl.uicomposers.TransactionsFormUiAdapter
-import com.tchibolabs.budgettracker.feature.transactionsform.impl.uicomposers.TransactionsFormUiComposer
+import com.tchibolabs.budgettracker.core.uicomposers.impl.transactionsform.TransactionsFormUiAdapter
+import com.tchibolabs.budgettracker.core.uicomposers.impl.transactionsform.TransactionsFormUiComposer
 
 @Composable
 fun TransactionsFormEntryPoint(

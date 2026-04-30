@@ -41,14 +41,15 @@ import com.tchibolabs.budgettracker.core.design.api.components.PickerOption
 import com.tchibolabs.budgettracker.core.design.api.components.PieChart
 import com.tchibolabs.budgettracker.core.design.api.theme.BudgetTrackerTheme
 import com.tchibolabs.budgettracker.core.navigation.api.BudgetRoute
-import com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers.CategoryBreakdown
-import com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers.CurrencyMode
-import com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers.DashboardEvent
-import com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers.DashboardTransactionRow
-import com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers.DashboardUiModel
-import com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers.dashboardLabel
-import com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers.label
-import com.tchibolabs.budgettracker.feature.dashboard.impl.uicomposers.DashboardUiAdapter
+import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.CategoryBreakdown
+import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.CurrencyMode
+import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.DashboardEvent
+import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.DashboardUiModel
+import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.dashboardLabel
+import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.label
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListUiComposer
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionRow
+import com.tchibolabs.budgettracker.core.uicomposers.impl.dashboard.DashboardUiAdapter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -144,24 +145,10 @@ private fun DashboardScreen(
                 }
             }
             item {
-                Text(
-                    text = "Top 5 Costs",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
+                TransactionListUiComposer(
+                    title = "Top 5 Costs",
+                    rows = uiModel.topCosts,
                 )
-            }
-            if (uiModel.topCosts.isEmpty()) {
-                item {
-                    Text(
-                        text = "No transactions found",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            } else {
-                items(uiModel.topCosts, key = { "cost-${it.id}" }) { row ->
-                    DashboardTransactionRowCard(row = row)
-                }
             }
             item {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -174,24 +161,10 @@ private fun DashboardScreen(
                 }
             }
             item {
-                Text(
-                    text = "Top 5 Income",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
+                TransactionListUiComposer(
+                    title = "Top 5 Income",
+                    rows = uiModel.topIncome,
                 )
-            }
-            if (uiModel.topIncome.isEmpty()) {
-                item {
-                    Text(
-                        text = "No transactions found",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            } else {
-                items(uiModel.topIncome, key = { "income-${it.id}" }) { row ->
-                    DashboardTransactionRowCard(row = row)
-                }
             }
         }
 
@@ -348,44 +321,6 @@ private fun LegendRow(
     }
 }
 
-@Composable
-private fun DashboardTransactionRowCard(
-    row: DashboardTransactionRow,
-    modifier: Modifier = Modifier,
-) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Text(
-                    text = row.category.uppercase(),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    text = row.dateLabel,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Text(
-                text = "${row.amountText} ${row.currency}",
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-    }
-}
-
 private fun Double.formatAmount(): String =
     if (this == this.toLong().toDouble()) "${this.toLong()}.0" else "%.2f".format(this)
 
@@ -410,12 +345,12 @@ private fun DashboardScreenPreview() {
                     CategoryBreakdown("Revenue", 10.0, Color(0xFF26A69A)),
                 ),
                 topIncome = listOf(
-                    DashboardTransactionRow(1, "Salary", "15 Mar 2026", "1000.0", "EUR"),
-                    DashboardTransactionRow(2, "Salary", "22 Mar 2026", "257.0", "RON"),
+                    TransactionRow(1, "Salary", null, "15 Mar 2026", "1000.0", "EUR", true),
+                    TransactionRow(2, "Salary", null, "22 Mar 2026", "257.0", "RON", true),
                 ),
                 topCosts = listOf(
-                    DashboardTransactionRow(10, "Rent", "1 Mar 2026", "3442.0", "RON"),
-                    DashboardTransactionRow(11, "Food", "12 Mar 2026", "543.0", "RON"),
+                    TransactionRow(10, "Rent", null, "1 Mar 2026", "3442.0", "RON", false),
+                    TransactionRow(11, "Food", null, "12 Mar 2026", "543.0", "RON", false),
                 ),
                 openPickerId = null,
                 isLoading = false,

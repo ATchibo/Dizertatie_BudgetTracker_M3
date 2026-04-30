@@ -1,17 +1,20 @@
-package com.tchibolabs.budgettracker.feature.transactions.impl.uicomposers
+package com.tchibolabs.budgettracker.core.uicomposers.impl.transactions
 
 import com.tchibolabs.budgettracker.core.data.api.model.Transaction
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionKind
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionOrder
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionPeriod
 import com.tchibolabs.budgettracker.core.data.api.repository.TransactionRepository
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.FilterOption
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListScope
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListSourceRow
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListUiAdapter
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListUiAdapterFactory
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsEvent
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsFilter
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsUiModel
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.label
 import com.tchibolabs.budgettracker.core.uisystem.api.UiAdapter
-import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.FilterOption
-import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.TransactionRow
-import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.TransactionsEvent
-import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.TransactionsFilter
-import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.TransactionsUiModel
-import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.label
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import java.time.LocalDate
@@ -29,6 +32,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class TransactionsUiAdapter @Inject constructor(
     private val repository: TransactionRepository,
+    transactionListUiAdapterFactory: TransactionListUiAdapterFactory,
 ) : UiAdapter<TransactionsUiModel, TransactionsEvent>() {
 
     private val period = MutableStateFlow(TransactionPeriod.PAST_31_DAYS)
@@ -38,6 +42,8 @@ class TransactionsUiAdapter @Inject constructor(
 
     private val dateFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault())
+    private val transactionListUiAdapter: TransactionListUiAdapter =
+        transactionListUiAdapterFactory.create(TransactionListScope.TRANSACTIONS)
 
     override val uiModel: StateFlow<TransactionsUiModel> = combine(
         repository.observeAll(),
@@ -46,8 +52,9 @@ class TransactionsUiAdapter @Inject constructor(
         openPickerId,
         pendingDeleteId,
     ) { all, currentPeriod, currentOrder, openId, deleteId ->
+        val sourceRows = all.applyFilters(currentPeriod, currentOrder).map { it.toSourceRow() }
         TransactionsUiModel(
-            rows = all.applyFilters(currentPeriod, currentOrder).map { it.toRow() },
+            rows = transactionListUiAdapter.composeRows(sourceRows),
             filters = buildFilters(currentPeriod, currentOrder, openId),
             pendingDeleteId = deleteId,
             isLoading = false,
@@ -133,21 +140,18 @@ class TransactionsUiAdapter @Inject constructor(
         }
     }
 
-    private fun Transaction.toRow(): TransactionRow {
+    private fun Transaction.toSourceRow(): TransactionListSourceRow {
         val date = Instant.ofEpochMilli(occurredAtEpochMs)
             .atZone(ZoneId.systemDefault())
             .toLocalDate()
-        return TransactionRow(
+        return TransactionListSourceRow(
             id = id,
             category = category,
             note = note,
             dateLabel = date.format(dateFormatter),
-            amountText = amount.formatAmount(),
+            amount = amount,
             currency = currency.name,
             isIncome = kind == TransactionKind.Income,
         )
     }
-
-    private fun Double.formatAmount(): String =
-        if (this == this.toLong().toDouble()) "${this.toLong()}.0" else "%.2f".format(this)
 }

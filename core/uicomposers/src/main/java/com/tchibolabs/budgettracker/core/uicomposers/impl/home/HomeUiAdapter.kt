@@ -1,10 +1,10 @@
-package com.tchibolabs.budgettracker.feature.home.impl.uicomposers
+package com.tchibolabs.budgettracker.core.uicomposers.impl.home
 
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionKind
 import com.tchibolabs.budgettracker.core.data.api.repository.TransactionRepository
+import com.tchibolabs.budgettracker.core.uicomposers.api.home.HomeEvent
+import com.tchibolabs.budgettracker.core.uicomposers.api.home.HomeUiModel
 import com.tchibolabs.budgettracker.core.uisystem.api.UiAdapter
-import com.tchibolabs.budgettracker.feature.home.api.uicomposers.HomeEvent
-import com.tchibolabs.budgettracker.feature.home.api.uicomposers.HomeUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow

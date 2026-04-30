@@ -1,4 +1,4 @@
-package com.tchibolabs.budgettracker.feature.dashboard.impl.uicomposers
+package com.tchibolabs.budgettracker.core.uicomposers.impl.dashboard
 
 import androidx.compose.ui.graphics.Color
 import com.tchibolabs.budgettracker.core.data.api.model.Currency
@@ -7,12 +7,15 @@ import com.tchibolabs.budgettracker.core.data.api.model.TransactionKind
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionPeriod
 import com.tchibolabs.budgettracker.core.data.api.repository.ExchangeRateRepository
 import com.tchibolabs.budgettracker.core.data.api.repository.TransactionRepository
+import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.CategoryBreakdown
+import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.CurrencyMode
+import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.DashboardEvent
+import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.DashboardUiModel
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListScope
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListSourceRow
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListUiAdapter
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListUiAdapterFactory
 import com.tchibolabs.budgettracker.core.uisystem.api.UiAdapter
-import com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers.CategoryBreakdown
-import com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers.CurrencyMode
-import com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers.DashboardEvent
-import com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers.DashboardTransactionRow
-import com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers.DashboardUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import java.time.LocalDate
@@ -35,6 +38,7 @@ import kotlinx.coroutines.launch
 class DashboardUiAdapter @Inject constructor(
     private val transactions: TransactionRepository,
     private val rates: ExchangeRateRepository,
+    transactionListUiAdapterFactory: TransactionListUiAdapterFactory,
 ) : UiAdapter<DashboardUiModel, DashboardEvent>() {
 
     private val period = MutableStateFlow(TransactionPeriod.PAST_31_DAYS)
@@ -59,6 +63,8 @@ class DashboardUiAdapter @Inject constructor(
 
     private val dateFormatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault())
+    private val transactionListUiAdapter: TransactionListUiAdapter =
+        transactionListUiAdapterFactory.create(TransactionListScope.DASHBOARD)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val uiModel: StateFlow<DashboardUiModel> = combine(
@@ -133,12 +139,14 @@ class DashboardUiAdapter @Inject constructor(
         val topIncome = incomeItems
             .sortedByDescending { it.second }
             .take(5)
-            .map { it.toRow(inputs.currency) }
+            .map { it.toSourceRow(inputs.currency) }
+            .let(transactionListUiAdapter::composeRows)
 
         val topCosts = expenseItems
             .sortedByDescending { it.second }
             .take(5)
-            .map { it.toRow(inputs.currency) }
+            .map { it.toSourceRow(inputs.currency) }
+            .let(transactionListUiAdapter::composeRows)
 
         return DashboardUiModel(
             period = inputs.period,
@@ -201,23 +209,22 @@ class DashboardUiAdapter @Inject constructor(
         }
     }
 
-    private fun Pair<Transaction, Double>.toRow(displayCurrency: Currency): DashboardTransactionRow {
+    private fun Pair<Transaction, Double>.toSourceRow(displayCurrency: Currency): TransactionListSourceRow {
         val transaction = first
         val amount = second
         val date = Instant.ofEpochMilli(transaction.occurredAtEpochMs)
             .atZone(ZoneId.systemDefault())
             .toLocalDate()
-        return DashboardTransactionRow(
+        return TransactionListSourceRow(
             id = transaction.id,
             category = transaction.category,
+            note = transaction.note,
             dateLabel = date.format(dateFormatter),
-            amountText = amount.formatAmount(),
+            amount = amount,
             currency = displayCurrency.name,
+            isIncome = transaction.kind == TransactionKind.Income,
         )
     }
-
-    private fun Double.formatAmount(): String =
-        if (this == this.toLong().toDouble()) "${this.toLong()}.0" else "%.2f".format(this)
 
     private data class Inputs(
         val all: List<Transaction>,

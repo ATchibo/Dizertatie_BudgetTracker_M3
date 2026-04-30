@@ -6,8 +6,8 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tchibolabs.budgettracker.core.navigation.api.BudgetRoute
-import com.tchibolabs.budgettracker.feature.home.impl.uicomposers.HomeUiAdapter
-import com.tchibolabs.budgettracker.feature.home.impl.uicomposers.HomeUiComposer
+import com.tchibolabs.budgettracker.core.uicomposers.impl.home.HomeUiAdapter
+import com.tchibolabs.budgettracker.core.uicomposers.impl.home.HomeUiComposer
 
 @Composable
 fun HomeEntryPoint(
