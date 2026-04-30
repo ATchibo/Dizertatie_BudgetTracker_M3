@@ -89,17 +89,19 @@ class TransactionsFormUiAdapter @Inject constructor(
         if (!current.isValid || current.isSaving) return
         _uiModel.update { it.copy(isSaving = true) }
         scope.launch {
-            val transaction = Transaction(
-                id = current.id ?: 0L,
-                kind = if (current.category.isIncome) TransactionKind.Income else TransactionKind.Expense,
-                amount = current.amountText.toDouble(),
-                currency = current.currency,
-                category = current.category.name,
-                note = current.description.takeIf { it.isNotBlank() },
-                occurredAtEpochMs = current.resolveOccurredAtEpochMs(),
-            )
-            repository.upsert(transaction)
-            _uiModel.update { it.copy(isSaving = false, saved = true) }
+            val savedSuccessfully = runCatching {
+                val transaction = Transaction(
+                    id = current.id ?: 0L,
+                    kind = if (current.category.isIncome) TransactionKind.Income else TransactionKind.Expense,
+                    amount = current.amountText.toDouble(),
+                    currency = current.currency,
+                    category = current.category.name,
+                    note = current.description.takeIf { it.isNotBlank() },
+                    occurredAtEpochMs = current.resolveOccurredAtEpochMs(),
+                )
+                repository.upsert(transaction)
+            }.isSuccess
+            _uiModel.update { it.copy(isSaving = false, saved = savedSuccessfully) }
         }
     }
 

@@ -107,11 +107,14 @@ class DashboardUiAdapter @Inject constructor(
             }
             is DashboardEvent.Refresh -> scope.launch {
                 isRefreshing.value = true
-                Currency.values()
-                    .filter { it != currency.value }
-                    .forEach { rates.refresh(it.name) }
-                refreshCount.value++
-                isRefreshing.value = false
+                try {
+                    Currency.values()
+                        .filter { it != currency.value }
+                        .forEach { rates.refresh(it.name) }
+                    refreshCount.value++
+                } finally {
+                    isRefreshing.value = false
+                }
             }
         }
     }

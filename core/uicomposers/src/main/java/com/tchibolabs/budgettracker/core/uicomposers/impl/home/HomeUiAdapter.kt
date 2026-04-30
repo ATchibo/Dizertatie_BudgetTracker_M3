@@ -27,7 +27,9 @@ class HomeUiAdapter @Inject constructor(
 
     override fun onEvent(event: HomeEvent) {
         when (event) {
-            HomeEvent.Refresh -> observeTransactions()
+            HomeEvent.Refresh -> {
+                // Repository is already observed continuously from init.
+            }
         }
     }
 
