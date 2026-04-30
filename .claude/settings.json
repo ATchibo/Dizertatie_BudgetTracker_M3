@@ -36,7 +36,16 @@
       "Bash(./gradlew assembleDebug)",
       "Skill(schedule)",
       "Skill(schedule:*)",
-      "Bash(git -C /home/tchibo/AndroidStudioProjects/BudgetTrackerFull remote -v)"
+      "Bash(git -C /home/tchibo/AndroidStudioProjects/BudgetTrackerFull remote -v)",
+      "Read(//home/tchibo/.gradle/caches/**)",
+      "Bash(jar -tf /home/tchibo/.gradle/caches/9.1.0/transforms/f2e82272b9eaf17f90210e6ada0b3cb6/transformed/lifecycle-viewmodel-navigation3-runtime.jar)",
+      "Bash(xargs jar *)",
+      "Bash(grep \"\\\\.kt$\")",
+      "Bash(jar -xf ~/.gradle/caches/modules-2/files-2.1/androidx.lifecycle/lifecycle-viewmodel-navigation3-android/2.10.0/21220c272128aec84a53295af7e733b6679297cf/lifecycle-viewmodel-navigation3-android-2.10.0-sources.jar commonMain/androidx/lifecycle/viewmodel/navigation3/ViewModelStoreNavEntryDecorator.kt -C /tmp/nav3src)",
+      "Read(//tmp/nav3src/commonMain/androidx/lifecycle/viewmodel/navigation3/**)",
+      "Bash(jar -tf ~/.gradle/caches/modules-2/files-2.1/androidx.lifecycle/lifecycle-viewmodel-navigation3-android/2.10.0/21220c272128aec84a53295af7e733b6679297cf/lifecycle-viewmodel-navigation3-android-2.10.0-sources.jar)",
+      "Read(//tmp/nav3ui/commonMain/androidx/navigation3/ui/**)",
+      "Read(//tmp/nav3rt/commonMain/androidx/navigation3/runtime/**)"
     ]
   }
 }
