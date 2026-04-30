@@ -1,12 +1,12 @@
-package com.tchibolabs.budgettracker.feature.transactionsform.impl
+package com.tchibolabs.budgettracker.feature.transactionsform.impl.uicomposers
 
 import com.tchibolabs.budgettracker.core.data.api.model.Transaction
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionKind
 import com.tchibolabs.budgettracker.core.data.api.repository.TransactionRepository
-import com.tchibolabs.budgettracker.core.uicomposers.api.transactionsform.TransactionCategory
-import com.tchibolabs.budgettracker.core.uicomposers.api.transactionsform.TransactionsFormEvent
-import com.tchibolabs.budgettracker.core.uicomposers.api.transactionsform.TransactionsFormUiModel
 import com.tchibolabs.budgettracker.core.uisystem.api.UiAdapter
+import com.tchibolabs.budgettracker.feature.transactionsform.api.uicomposers.TransactionCategory
+import com.tchibolabs.budgettracker.feature.transactionsform.api.uicomposers.TransactionsFormEvent
+import com.tchibolabs.budgettracker.feature.transactionsform.api.uicomposers.TransactionsFormUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import java.time.LocalDate

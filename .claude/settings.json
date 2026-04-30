@@ -32,7 +32,11 @@
       "Bash(curl -sv \"https://api.frankfurter.app/latest?from=USD&to=EUR,RON\")",
       "Bash(curl -s 'https://api.frankfurter.app/latest?from=USD&to=EUR,RON')",
       "Bash(curl -w \"\\\\n%{http_code}\" 'https://api.frankfurter.app/latest?from=USD&to=EUR,RON')",
-      "Bash(curl -v -L 'https://api.frankfurter.app/latest?from=USD&to=EUR,RON')"
+      "Bash(curl -v -L 'https://api.frankfurter.app/latest?from=USD&to=EUR,RON')",
+      "Bash(./gradlew assembleDebug)",
+      "Skill(schedule)",
+      "Skill(schedule:*)",
+      "Bash(git -C /home/tchibo/AndroidStudioProjects/BudgetTrackerFull remote -v)"
     ]
   }
 }

@@ -1,17 +1,17 @@
-package com.tchibolabs.budgettracker.feature.transactions.impl
+package com.tchibolabs.budgettracker.feature.transactions.impl.uicomposers
 
 import com.tchibolabs.budgettracker.core.data.api.model.Transaction
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionKind
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionOrder
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionPeriod
 import com.tchibolabs.budgettracker.core.data.api.repository.TransactionRepository
-import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.FilterOption
-import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionRow
-import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsEvent
-import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsFilter
-import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsUiModel
-import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.label
 import com.tchibolabs.budgettracker.core.uisystem.api.UiAdapter
+import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.FilterOption
+import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.TransactionRow
+import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.TransactionsEvent
+import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.TransactionsFilter
+import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.TransactionsUiModel
+import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.label
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import java.time.LocalDate

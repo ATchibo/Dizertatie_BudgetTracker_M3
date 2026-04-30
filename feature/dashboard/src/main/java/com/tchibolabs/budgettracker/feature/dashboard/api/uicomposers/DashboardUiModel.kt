@@ -1,4 +1,4 @@
-package com.tchibolabs.budgettracker.core.uicomposers.api.dashboard
+package com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers
 
 import androidx.compose.ui.graphics.Color
 import com.tchibolabs.budgettracker.core.data.api.model.Currency

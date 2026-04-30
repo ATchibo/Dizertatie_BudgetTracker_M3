@@ -1,4 +1,4 @@
-package com.tchibolabs.budgettracker.feature.dashboard.impl
+package com.tchibolabs.budgettracker.feature.dashboard.impl.uicomposers
 
 import androidx.compose.ui.graphics.Color
 import com.tchibolabs.budgettracker.core.data.api.model.Currency
@@ -7,12 +7,12 @@ import com.tchibolabs.budgettracker.core.data.api.model.TransactionKind
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionPeriod
 import com.tchibolabs.budgettracker.core.data.api.repository.ExchangeRateRepository
 import com.tchibolabs.budgettracker.core.data.api.repository.TransactionRepository
-import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.CategoryBreakdown
-import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.CurrencyMode
-import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.DashboardEvent
-import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.DashboardTransactionRow
-import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.DashboardUiModel
 import com.tchibolabs.budgettracker.core.uisystem.api.UiAdapter
+import com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers.CategoryBreakdown
+import com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers.CurrencyMode
+import com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers.DashboardEvent
+import com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers.DashboardTransactionRow
+import com.tchibolabs.budgettracker.feature.dashboard.api.uicomposers.DashboardUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import java.time.LocalDate
@@ -21,7 +21,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -30,6 +29,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class DashboardUiAdapter @Inject constructor(
@@ -199,19 +199,6 @@ class DashboardUiAdapter @Inject constructor(
             TransactionPeriod.CURRENT_MONTH -> today.withDayOfMonth(1).atStartOfDay(zone).toInstant().toEpochMilli()
             TransactionPeriod.ALL_TIME -> null
         }
-    }
-
-    private fun Transaction.toRow(): DashboardTransactionRow {
-        val date = Instant.ofEpochMilli(occurredAtEpochMs)
-            .atZone(ZoneId.systemDefault())
-            .toLocalDate()
-        return DashboardTransactionRow(
-            id = id,
-            category = category,
-            dateLabel = date.format(dateFormatter),
-            amountText = amount.formatAmount(),
-            currency = currency.name,
-        )
     }
 
     private fun Pair<Transaction, Double>.toRow(displayCurrency: Currency): DashboardTransactionRow {

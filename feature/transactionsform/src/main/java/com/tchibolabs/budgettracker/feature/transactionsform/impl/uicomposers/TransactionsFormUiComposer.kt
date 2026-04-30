@@ -1,4 +1,4 @@
-package com.tchibolabs.budgettracker.core.uicomposers.api.transactionsform
+package com.tchibolabs.budgettracker.feature.transactionsform.impl.uicomposers
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,6 +34,9 @@ import com.tchibolabs.budgettracker.core.design.api.components.FilterChipCard
 import com.tchibolabs.budgettracker.core.design.api.components.OptionsBottomSheet
 import com.tchibolabs.budgettracker.core.design.api.components.PickerOption
 import com.tchibolabs.budgettracker.core.design.api.theme.BudgetTrackerTheme
+import com.tchibolabs.budgettracker.feature.transactionsform.api.uicomposers.TransactionCategory
+import com.tchibolabs.budgettracker.feature.transactionsform.api.uicomposers.TransactionsFormEvent
+import com.tchibolabs.budgettracker.feature.transactionsform.api.uicomposers.TransactionsFormUiModel
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -179,11 +182,7 @@ private fun AmountField(
     TextField(
         value = value,
         onValueChange = onValueChange,
-        label = {
-            Text(
-                buildAmountLabel(),
-            )
-        },
+        label = { Text(buildAmountLabel()) },
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         modifier = Modifier.fillMaxWidth(),

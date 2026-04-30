@@ -1,4 +1,4 @@
-package com.tchibolabs.budgettracker.core.uicomposers.api.transactions
+package com.tchibolabs.budgettracker.feature.transactions.impl.uicomposers
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,6 +29,12 @@ import com.tchibolabs.budgettracker.core.design.api.components.PickerOption
 import com.tchibolabs.budgettracker.core.design.api.components.TransactionCard
 import com.tchibolabs.budgettracker.core.design.api.theme.BudgetTrackerTheme
 import com.tchibolabs.budgettracker.core.navigation.api.BudgetRoute
+import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.FilterOption
+import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.TransactionRow
+import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.TransactionsEvent
+import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.TransactionsFilter
+import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.TransactionsUiModel
+import com.tchibolabs.budgettracker.feature.transactions.api.uicomposers.label
 
 @Composable
 fun TransactionsUiComposer(

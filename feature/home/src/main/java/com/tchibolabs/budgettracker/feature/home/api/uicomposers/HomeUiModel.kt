@@ -1,4 +1,4 @@
-package com.tchibolabs.budgettracker.core.uicomposers.api.home
+package com.tchibolabs.budgettracker.feature.home.api.uicomposers
 
 import com.tchibolabs.budgettracker.core.uisystem.api.UiModel
 

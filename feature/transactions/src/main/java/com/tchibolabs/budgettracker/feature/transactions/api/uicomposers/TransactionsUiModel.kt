@@ -1,4 +1,4 @@
-package com.tchibolabs.budgettracker.core.uicomposers.api.transactions
+package com.tchibolabs.budgettracker.feature.transactions.api.uicomposers
 
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionOrder
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionPeriod
