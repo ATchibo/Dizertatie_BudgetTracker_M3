@@ -1,105 +1,238 @@
 # Structural Audit Report
 
-## MVVM & State Management
+_Last updated: 2026-05-03. Items marked ✅ were resolved in a previous session._
 
-- **Location:** `core/uicomposers/impl/home/HomeUiAdapter.kt`  
-  **The Violation:** Violates single-source reactive collection (refresh triggers additional collectors).  
-  **The Why:** Calling `observeTransactions()` on `Refresh` launches another long-lived `collect`, causing duplicate work and possible race updates.  
-  **Refactor Suggestion:** Keep one collector for repository flow and model refresh as a state/input in that same pipeline.
+---
 
-- **Location:** `core/uicomposers/impl/dashboard/DashboardUiAdapter.kt`  
-  **The Violation:** Reducer impurity (state derivation mutates source state).  
-  **The Why:** `compute()`/`ensureRates()` writes to `currencyMode` during model computation, which can create re-entrant updates and hard-to-debug loops.  
-  **Refactor Suggestion:** Make compute path pure and move `currencyMode` fallback to explicit event/reducer transitions.
+## 1. MVVM & State Management
 
-- **Location:** `core/uicomposers/impl/dashboard/DashboardUiAdapter.kt`  
-  **The Violation:** Refresh lifecycle handling not exception-safe.  
-  **The Why:** `isRefreshing` is toggled manually without a guaranteed `finally`, so failure/cancellation can leave UI stuck refreshing.  
-  **Refactor Suggestion:** Wrap refresh body with `try/finally` and always reset `isRefreshing`.
+### ✅ FIXED — DashboardUiAdapter: `isRefreshing` not exception-safe
+`isRefreshing` toggle now wrapped in `try/finally` guaranteeing reset on failure or cancellation.
 
-- **Location:** `core/uicomposers/impl/transactionsform/TransactionsFormUiAdapter.kt`  
-  **The Violation:** Incomplete failure path for save flow.  
-  **The Why:** `upsert()` errors are not surfaced and `isSaving` is reset only on success, risking stuck loading state.  
-  **Refactor Suggestion:** Use `runCatching`/`try-finally`, emit error effect/state, always reset `isSaving`.
+### ✅ FIXED — TransactionsFormUiAdapter: Incomplete failure path for save
+`save()` now uses `runCatching`, always resets `isSaving`, and emits on `saveError: SharedFlow<Unit>` so the UI can react.
 
-- **Location:** `core/uicomposers/impl/home`, `impl/transactions`, `impl/transactionsform`  
-  **The Violation:** Inconsistent one-off effect handling.  
-  **The Why:** Dashboard uses `SharedFlow` for transient errors, while other adapters mostly rely on persistent state flags or nothing.  
-  **Refactor Suggestion:** Standardize transient `UiEffect` channels (`SharedFlow`) where one-shot UI effects are needed.
+### ✅ FIXED — HomeUiAdapter: Refresh launched duplicate collectors
+`HomeEvent.Refresh` is now a documented no-op; the single `observeAll()` collector started in `init` handles live updates.
 
-## Clean Architecture & SOLID
+---
 
-- **Location:** `feature/*/api/*EntryPoint.kt` (`home`, `dashboard`, `transactions`, `transactionsform`)  
-  **The Violation:** API layer depends on implementation classes.  
-  **The Why:** `feature ... api` imports `core.uicomposers.impl.*`, coupling high-level feature contracts to low-level details.  
-  **Refactor Suggestion:** Expose only `core.uicomposers.api` contracts/factories and resolve impl via DI bindings.
+### 🔴 DashboardUiAdapter: Impure reducer still mutates upstream state
 
-- **Location:** `core/uicomposers/api/transactionsform/TransactionsFormUiModel.kt`  
-  **The Violation:** Model/UI concern mixing (semantic model embeds Compose `Color`).  
-  **The Why:** Category semantics become tied to rendering tech/theme, reducing portability and theming flexibility.  
-  **Refactor Suggestion:** Keep category model semantic-only and map to color in UI/design mapping layer.
+**Location:** `core/uicomposers/src/.../impl/dashboard/DashboardUiAdapter.kt:127`
 
-## Compose Best Practices
+```kotlin
+// Inside compute(), which runs inside mapLatest — a "pure" transformation:
+if (effectiveMode != inputs.mode) {
+    scope.launch { currencyMode.value = effectiveMode }  // ← side effect in reducer
+}
+```
 
-- **Location:** `core/uicomposers/impl/*`, `feature/dashboard/api/DashboardEntryPoint.kt`, `core/design/api/components/TransactionCard.kt`  
-  **The Violation:** Hardcoded user-facing strings.  
-  **The Why:** Breaks localization, consistency, and product copy governance.  
-  **Refactor Suggestion:** Move all text to `strings.xml` and consume via `stringResource`.
+`compute()` is wired as the body of a `mapLatest` transformer and must be a pure function (inputs → output). The `scope.launch` inside it fires a state mutation that will immediately re-trigger the pipeline, creating an implicit feedback loop that is hard to reason about and test.
 
-- **Location:** `core/uicomposers/impl/transactions/TransactionListUiAdapterImpl.kt`, `feature/dashboard/api/DashboardEntryPoint.kt`  
-  **The Violation:** Ad-hoc amount formatting in UI layer.  
-  **The Why:** Locale/currency formatting inconsistencies are likely in finance UI.  
-  **Refactor Suggestion:** Centralize money formatting in a shared formatter utility.
+**Fix:** Return the effective mode as part of the computed output and apply the state correction in a dedicated `onEach` or `flatMapLatest` stage after the pure compute call. `compute()` should return a pair `(UiModel, CurrencyMode?)` or a sealed result type.
 
-- **Location:** `feature/dashboard/api/DashboardEntryPoint.kt`  
-  **The Violation:** Oversized screen file + unused input (`onNavigate`).  
-  **The Why:** Large composable files are harder to maintain and unused API parameters drift contract clarity.  
-  **Refactor Suggestion:** Split dashboard sections into dedicated files and remove or wire `onNavigate`.
+---
 
-## Package Topology
+### 🟡 DashboardUiAdapter: `ensureRates` mutates `currencyMode` from `onEvent`
 
-- **Location:** `core/uicomposers/**`  
-  **The Violation:** Potential "gravity well" centralization of feature-specific presentation logic.  
-  **The Why:** As logic grows, cross-feature coupling risk increases and ownership boundaries blur.  
-  **Refactor Suggestion:** Keep only shared presentation primitives in `core`, and move feature-specific orchestration back behind stable feature boundaries or explicit core API modules per feature.
+**Location:** `core/uicomposers/src/.../impl/dashboard/DashboardUiAdapter.kt:104`
 
-- **Location:** `feature/dashboard/api/DashboardEntryPoint.kt`  
-  **The Violation:** API package holding heavy UI implementation details.  
-  **The Why:** API surface gets polluted and package intent becomes unclear.  
-  **Refactor Suggestion:** Keep API package thin (entry contracts), place implementation UI under impl-oriented package.
+```kotlin
+is DashboardEvent.SelectOption -> ...
+    ?.let { currencyMode.value = it }
+```
 
-## Dependency Injection
+Not a pure-reducer violation on its own (events are the right place for mutations), but the interaction with the impure `compute()` above doubles the re-entry risk. Resolve together with the point above.
 
-- **Location:** `feature/*/api/*EntryPoint.kt` + `core/uicomposers/impl/*`  
-  **The Violation:** DI composition leaks through package boundaries.  
-  **The Why:** Hilt wiring works, but consumer modules import impl types directly, weakening encapsulation/scoping intent.  
-  **Refactor Suggestion:** Introduce API-facing adapter/composer providers (interfaces) and bind impl in DI modules.
+---
 
-- **Location:** `core/uicomposers/impl/di/TransactionListAdapterModule.kt`  
-  **The Violation:** Scope granularity likely too broad (`SingletonComponent`) for UI composition strategy.  
-  **The Why:** Long-lived singletons for UI composition factories can be acceptable, but tighter scope improves future flexibility/test isolation.  
-  **Refactor Suggestion:** Re-evaluate whether factory/provider should be singleton or viewmodel/component-scoped.
+## 2. Compose Pattern Violations
 
-## Test Coverage Debt (Critical)
+### 🔴 Side effect (LaunchedEffect) inside a UiComposer
 
-- **Location:** Repo-wide (`core/uicomposers/impl/*` especially)  
-  **The Violation:** Missing unit tests for key reducer/adapter logic.  
-  **The Why:** Finance-critical behavior (sorting/filtering/conversion/save flows) can regress silently.  
-  **Refactor Suggestion:** Add adapter tests first for `DashboardUiAdapter`, `TransactionsUiAdapter`, `TransactionsFormUiAdapter`, and `HomeUiAdapter` event/state transitions.
+**Location:** `core/uicomposers/src/.../impl/transactionsform/TransactionsFormUiComposer.kt:59–61`
 
-## Positive Observations
+```kotlin
+LaunchedEffect(uiModel.saved) {
+    if (uiModel.saved) onSaved()
+}
+```
 
-- Strong UDF direction: adapters expose `StateFlow<UiModel>` + sealed events, and screens mostly stay stateless renderers.
-- Good lifecycle handling in entry points with `collectAsStateWithLifecycle`.
-- Reusable composition introduced: `TransactionListUiAdapter` + `TransactionListUiComposer` reduces duplicated row rendering logic.
-- `LazyColumn` keys are provided for transaction rows (`key = { it.id }`), which helps list stability.
-- Use of Hilt with constructor injection is clean and consistent across modules.
-- Previews are present for major composables, helping UI iteration speed.
+By the project's pattern, `UiComposer` is a **stateless renderer** — it takes a `UiModel` and emits callbacks. Side effects driven by state transitions belong in the **EntryPoint** layer (watching `SharedFlow`/`StateFlow` via `LaunchedEffect`). Putting navigation-triggering logic here couples the rendering layer to flow control.
 
-## Test Coverage Gaps
+**Fix:** Expose `saved` as a `SharedFlow<Unit>` on the adapter (mirror the `saveError` pattern already in place), collect it in `TransactionsFormEntryPoint`, and call `onNavigate` from there. Remove `onSaved` parameter and `LaunchedEffect` from the composer.
 
-- No adapter reducer tests for event-to-state transitions (all four adapters).
-- No tests for filter/order/cutoff correctness in `TransactionsUiAdapter`.
-- No tests for conversion fallback behavior and refresh/error scenarios in `DashboardUiAdapter`.
-- No tests for form input sanitization (`filterAmountInput`), save idempotency, and edit/new load behavior in `TransactionsFormUiAdapter`.
-- No UI tests validating critical dialogs/bottom sheets and destructive action flow (delete confirm).
+---
+
+### 🟡 Hardcoded strings remaining in UI layer
+
+The previous session moved most strings to `strings.xml`. The following are still hardcoded:
+
+| File | Line(s) | Strings |
+|------|---------|---------|
+| `app/.../navigation/TabbedShell.kt` | 29, 34, 41 | `"Transactions"`, `"Dashboard"`, `"BudgetTracker"` |
+| `core/design/.../BudgetTopAppBar.kt` | 40 | `"Back"` (contentDescription) |
+| `core/uicomposers/api/.../TransactionsUiModel.kt` | 9–22 | `"Today"`, `"All time"`, `"Date (Oldest first)"`, etc. — period/order labels in extension properties |
+| `core/uicomposers/api/.../DashboardUiModel.kt` | 20–25 | Same period labels for dashboard filter |
+| `core/uicomposers/api/.../TransactionListUiComposer.kt` | 22 | `"No transactions found"` default parameter |
+
+**Note on period/order labels:** These live in `api/` model files as `val TransactionPeriod.label: String` extension properties. Moving them to `strings.xml` requires access to a `Context`/`Resources`, which does not belong in a plain Kotlin model. The right fix is to move these display-name mappings into the `UiComposer` layer (e.g., a `@Composable fun TransactionPeriod.label() = stringResource(...)` extension), keeping the model itself context-free.
+
+---
+
+### 🟡 Missing `@Preview` annotations
+
+| File | Composable |
+|------|-----------|
+| `app/.../navigation/TabbedShell.kt` | `TabbedShell` |
+| `core/design/.../OptionsBottomSheet.kt` | `OptionsBottomSheet` |
+
+Project rule: every public `@Composable` must have a `@Preview`.
+
+---
+
+## 3. Code Duplication
+
+### 🟡 `cutoffMs()` implemented twice
+
+**Locations:**
+- `core/uicomposers/src/.../impl/dashboard/DashboardUiAdapter.kt:204`
+- `core/uicomposers/src/.../impl/transactions/TransactionsUiAdapter.kt:130`
+
+Identical private extension function `TransactionPeriod.cutoffMs(): Long?` exists in both adapters. Any future change to period semantics (e.g., adding `PAST_90_DAYS`) must be applied in two places.
+
+**Fix:** Promote to an internal or public extension in `core/uicomposers/api/` (e.g., `TransactionPeriodExt.kt`).
+
+---
+
+## 4. Dead Code
+
+### 🟡 `feature:home` module is completely unused
+
+The module is declared in `settings.gradle.kts` but never imported by `:app` or any other module. `HomeEntryPoint`, `HomeUiAdapter`, and `HomeUiComposer` are never reachable.
+
+**Impact:** Unnecessary compilation, Hilt component generation, and classpath bloat on every build.
+
+**Fix:** Either wire the module into navigation (add `BudgetRoute.Home` entry to `BudgetTrackerNavHost`, add a Home tab) or delete the module and remove it from `settings.gradle.kts`.
+
+---
+
+### 🟡 `BudgetRoute.Home` is an orphan route
+
+**Location:** `core/navigation/src/.../api/BudgetRoute.kt:10`
+
+`BudgetRoute.Home` is declared in the sealed interface but has no matching `entry(...)` in `BudgetTrackerNavHost` and is never pushed onto the back stack. The fallback in `entryProvider` will throw `IllegalStateException` if it is ever reached.
+
+**Fix:** Delete the variant together with the home feature, or wire it up.
+
+---
+
+## 5. Architecture & Package Topology
+
+### ✅ FIXED — `TransactionCategory` embedded Compose `Color` in UiModel
+`Color` removed; color is now derived from the design layer only.
+
+### ✅ FIXED — `formatAmount` duplicated across layers
+Centralized in `core/uicomposers/api/AmountFormatter.kt`.
+
+### ✅ FIXED — `DashboardEntryPoint.onNavigate` unused parameter
+Parameter removed; navigation handled entirely by the NavHost.
+
+---
+
+### 🟡 EntryPoints in `api/` import `impl/` types directly
+
+**Location:** All `feature/*/api/*EntryPoint.kt` files
+
+```kotlin
+// e.g. DashboardEntryPoint.kt
+adapter: DashboardUiAdapter = hiltViewModel()  // DashboardUiAdapter is in impl/
+```
+
+By project rules the `api/` package should not depend on `impl/`. The constraint is real: `hiltViewModel<T>()` requires the concrete ViewModel type. The pragmatic resolution is to accept this for `EntryPoint` files specifically (they are the DI wiring boundary) but document the exception explicitly, or introduce an abstract `UiAdapter` type per feature that the EntryPoint references.
+
+---
+
+### 🟡 Feature-specific presentation logic centralised in `core/uicomposers`
+
+All four feature adapters and composers live in `core/uicomposers/{api,impl}` rather than inside their respective feature modules. As the project grows this creates cross-feature coupling risk: a change to dashboard logic requires touching a `core` module that all features depend on, triggering full recompilation.
+
+**Consideration:** Keep only genuinely shared components (e.g., `TransactionListUiComposer`, `formatAmount`) in `core/uicomposers`. Move `DashboardUiAdapter`/`DashboardUiModel`/`DashboardUiComposer` into `feature/dashboard/impl`, and similarly for the others.
+
+---
+
+## 6. Dependency Injection
+
+### ✅ FIXED — `TransactionListAdapterModule` scope too broad
+Scope narrowed from `SingletonComponent` to `ActivityRetainedComponent`.
+
+---
+
+### 🟡 `lifecycle-viewmodel-navigation3` version was stale
+
+**Location:** `gradle/libs.versions.toml`
+
+`lifecycleViewmodelNav3` was pinned to `2.9.0-alpha09` while the locally cached artifact was `2.10.0`, causing a build failure. Fixed to `2.10.0` during the Nav3 migration.
+
+---
+
+## 7. Navigation
+
+### ✅ FIXED — Hand-rolled state-machine navigation replaced with Nav3
+`NavDisplay`, `rememberNavBackStack`, `entryProvider { }` DSL, and `NavKey` are now wired correctly. `BudgetRoute` implements `NavKey`. `TabbedShell` accepts a `content` slot rather than owning screen logic. `rememberSaveableStateHolderNavEntryDecorator` and `rememberViewModelStoreNavEntryDecorator` provide correct Compose state scoping and ViewModel scoping per back-stack entry.
+
+---
+
+## 8. Input Validation
+
+### 🟢 `filterAmountInput` + `isValid` are safe, but UX is rough
+
+**Location:** `core/uicomposers/src/.../impl/transactionsform/TransactionsFormUiAdapter.kt:127–133`
+
+`filterAmountInput()` permits a trailing lone `"."` in the text field (e.g., the user types `"5."`). `isValid` uses `toDoubleOrNull()` which returns `null` for `"."`, so the Save button stays disabled — no crash. However the user sees an unresolved decimal point with no feedback. A minor UX improvement would be to strip a trailing `"."` before display or show a validation message.
+
+---
+
+## 9. Test Coverage (Critical Gap)
+
+**Location:** Repo-wide — zero unit test files exist.
+
+Finance-critical logic that has no automated coverage:
+
+| Adapter | Untested Logic |
+|---------|----------------|
+| `DashboardUiAdapter` | Period cutoff filtering, currency conversion fallback, `compute()` purity, refresh error propagation |
+| `TransactionsUiAdapter` | Period/order filtering, sort correctness, cutoff boundary conditions |
+| `TransactionsFormUiAdapter` | `filterAmountInput`, `isValid`, save idempotency, load-existing-transaction flow |
+| `HomeUiAdapter` | Balance calculation, `observeAll` reactive pipeline |
+
+Also missing: tests for data mappers, `cutoffMs()` boundary cases, `formatAmount()` edge cases (zero, negative, large values).
+
+**Recommended starting point:** `TransactionsUiAdapter` period filtering and `DashboardUiAdapter` currency conversion — both are pure-ish functions that are straightforward to test with fakes.
+
+---
+
+## 10. Positive Observations
+
+- **UDF direction is strong:** adapters expose `StateFlow<UiModel>` + sealed events; screens are stateless renderers.
+- **Nav3 fully wired:** correct use of `entryProvider { }` DSL, per-entry ViewModel and saveable state scoping.
+- **Lifecycle awareness:** `collectAsStateWithLifecycle` used throughout entry points.
+- **`TransactionListUiComposer` reuse:** eliminates duplicated row rendering between dashboard and transactions screens.
+- **Hilt wiring:** constructor injection is clean and consistent; no manual `ViewModelProvider` calls.
+- **`LazyColumn` keyed:** `key = { it.id }` on transaction rows ensures correct list diffing.
+- **Error effects standardised:** both `DashboardUiAdapter.conversionError` and `TransactionsFormUiAdapter.saveError` use `SharedFlow` for one-shot UI effects.
+
+---
+
+## Priority Order for Next Session
+
+| # | Issue | Effort |
+|---|-------|--------|
+| 1 | Delete or wire `feature:home` + `BudgetRoute.Home` | Low |
+| 2 | Fix impure reducer in `DashboardUiAdapter.compute()` | Medium |
+| 3 | Move `LaunchedEffect(saved)` from `TransactionsFormUiComposer` to EntryPoint | Low |
+| 4 | Extract shared `cutoffMs()` to `core/uicomposers/api/` | Low |
+| 5 | Remaining hardcoded strings (TabbedShell, BudgetTopAppBar, period labels) | Medium |
+| 6 | Add missing `@Preview` for TabbedShell and OptionsBottomSheet | Low |
+| 7 | Add unit tests for UiAdapter logic | High effort, highest value |
