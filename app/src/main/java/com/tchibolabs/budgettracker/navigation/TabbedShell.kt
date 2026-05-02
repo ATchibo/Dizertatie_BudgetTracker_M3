@@ -1,5 +1,6 @@
 package com.tchibolabs.budgettracker.navigation
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -12,17 +13,14 @@ import androidx.compose.ui.Modifier
 import com.tchibolabs.budgettracker.core.design.api.components.BottomBarItem
 import com.tchibolabs.budgettracker.core.design.api.components.BudgetBottomBar
 import com.tchibolabs.budgettracker.core.design.api.components.BudgetTopAppBar
-import com.tchibolabs.budgettracker.core.navigation.api.BudgetRoute
 import com.tchibolabs.budgettracker.core.navigation.api.BudgetTab
-import com.tchibolabs.budgettracker.feature.dashboard.api.DashboardEntryPoint
-import com.tchibolabs.budgettracker.feature.transactions.api.TransactionsEntryPoint
 
 @Composable
 fun TabbedShell(
     selectedTab: BudgetTab,
     onSelectTab: (BudgetTab) -> Unit,
-    onNavigate: (BudgetRoute) -> Unit,
     modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
 ) {
     val items = remember {
         listOf(
@@ -46,23 +44,18 @@ fun TabbedShell(
                 items = items,
                 selectedKey = selectedTab.routeKey,
                 onSelect = { item ->
-                    val tab = BudgetTab.values().first { it.routeKey == item.key }
+                    val tab = BudgetTab.entries.first { it.routeKey == item.key }
                     onSelectTab(tab)
                 },
             )
         },
     ) { padding ->
-        val contentModifier = Modifier
-            .fillMaxSize()
-            .padding(padding)
-        when (selectedTab) {
-            BudgetTab.Transactions -> TransactionsEntryPoint(
-                modifier = contentModifier,
-                onNavigate = onNavigate,
-            )
-            BudgetTab.Dashboard -> DashboardEntryPoint(
-                modifier = contentModifier,
-            )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+        ) {
+            content()
         }
     }
 }

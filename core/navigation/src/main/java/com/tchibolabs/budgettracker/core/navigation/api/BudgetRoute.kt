@@ -1,9 +1,10 @@
 package com.tchibolabs.budgettracker.core.navigation.api
 
+import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed interface BudgetRoute {
+sealed interface BudgetRoute : NavKey {
 
     @Serializable
     data object Home : BudgetRoute

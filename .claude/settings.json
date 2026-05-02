@@ -45,7 +45,27 @@
       "Read(//tmp/nav3src/commonMain/androidx/lifecycle/viewmodel/navigation3/**)",
       "Bash(jar -tf ~/.gradle/caches/modules-2/files-2.1/androidx.lifecycle/lifecycle-viewmodel-navigation3-android/2.10.0/21220c272128aec84a53295af7e733b6679297cf/lifecycle-viewmodel-navigation3-android-2.10.0-sources.jar)",
       "Read(//tmp/nav3ui/commonMain/androidx/navigation3/ui/**)",
-      "Read(//tmp/nav3rt/commonMain/androidx/navigation3/runtime/**)"
+      "Read(//tmp/nav3rt/commonMain/androidx/navigation3/runtime/**)",
+      "Bash(xargs ls *)",
+      "Bash(./gradlew :app:dependencies --configuration debugRuntimeClasspath)",
+      "Bash(jar tf *)",
+      "Bash(javap -c /home/tchibo/.gradle/caches/9.3.1/transforms/27c779ac4292cd729cdc58543efd11cf/transformed/navigation3-runtime-api.jar)",
+      "Bash(jar xf *)",
+      "Read(//tmp/**)",
+      "Bash(javap -p classes.jar -classpath classes.jar)",
+      "Bash(javap -p androidx/navigation3/runtime/EntryProviderKt.class)",
+      "Bash(javap -p androidx/navigation3/runtime/NavEntryKt.class)",
+      "Bash(javap -p androidx/navigation3/runtime/SaveableStateHolderNavEntryDecoratorKt.class)",
+      "Bash(javap -p androidx/navigation3/runtime/RememberNavBackStackKt.class)",
+      "Bash(javap -p androidx/navigation3/runtime/NavKey.class)",
+      "Bash(javap -p androidx/navigation3/runtime/NavBackStack.class)",
+      "Bash(javap -p androidx/navigation3/scene/SceneSetupNavEntryDecoratorKt.class)",
+      "Bash(javap -p androidx/navigation3/ui/NavDisplayKt__NavDisplayKt.class)",
+      "Bash(javap -p androidx/navigation3/runtime/NavEntry.class)",
+      "Bash(javap -p androidx/navigation3/runtime/EntryProviderScope.class)",
+      "Bash(grep -v \"^\\\\.$\")",
+      "Bash(javap -p /home/tchibo/.gradle/caches/9.1.0/transforms/0d2b3a553c27a44a59c46b0557117e12/transformed/lifecycle-viewmodel-navigation3-api.jar/androidx/lifecycle/viewmodel/navigation3/ViewModelStoreNavEntryDecoratorKt.class)",
+      "Bash(./gradlew :app:compileDebugKotlin)"
     ]
   }
 }
