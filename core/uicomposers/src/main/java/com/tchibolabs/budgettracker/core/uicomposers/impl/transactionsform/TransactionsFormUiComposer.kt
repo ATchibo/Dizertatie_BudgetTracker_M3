@@ -25,10 +25,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tchibolabs.budgettracker.core.data.api.model.Currency
+import com.tchibolabs.budgettracker.core.uicomposers.R
 import com.tchibolabs.budgettracker.core.design.api.components.BudgetTopAppBar
 import com.tchibolabs.budgettracker.core.design.api.components.FilterChipCard
 import com.tchibolabs.budgettracker.core.design.api.components.OptionsBottomSheet
@@ -61,7 +63,7 @@ fun TransactionsFormUiComposer(
         modifier = modifier.fillMaxSize(),
         topBar = {
             BudgetTopAppBar(
-                title = if (uiModel.id == null) "Add Transaction" else "Edit Transaction",
+                title = if (uiModel.id == null) stringResource(R.string.form_title_add) else stringResource(R.string.form_title_edit),
                 onBack = onCancel,
             )
         },
@@ -79,17 +81,17 @@ fun TransactionsFormUiComposer(
                 onValueChange = { onEvent(TransactionsFormEvent.AmountChanged(it)) },
             )
             FilterChipCard(
-                label = "Currency",
+                label = stringResource(R.string.form_label_currency),
                 value = uiModel.currency.name,
                 onClick = { onEvent(TransactionsFormEvent.OpenCurrencyPicker) },
             )
             FilterChipCard(
-                label = "Category",
+                label = stringResource(R.string.form_label_category),
                 value = uiModel.category.label.uppercase(),
                 onClick = { onEvent(TransactionsFormEvent.OpenCategoryPicker) },
             )
             FilterChipCard(
-                label = "Date",
+                label = stringResource(R.string.form_label_date),
                 value = uiModel.occurredAtEpochMs.formatDate(),
                 onClick = { onEvent(TransactionsFormEvent.OpenDatePicker) },
             )
@@ -111,7 +113,7 @@ fun TransactionsFormUiComposer(
                     ),
                 ) {
                     Text(
-                        text = if (uiModel.isSaving) "Saving…" else "Save",
+                        text = if (uiModel.isSaving) stringResource(R.string.form_button_saving) else stringResource(R.string.form_button_save),
                         style = MaterialTheme.typography.titleMedium,
                     )
                 }
@@ -121,7 +123,7 @@ fun TransactionsFormUiComposer(
 
     if (uiModel.isCurrencyPickerOpen) {
         OptionsBottomSheet(
-            title = "Currency",
+            title = stringResource(R.string.form_label_currency),
             options = Currency.values().map { PickerOption(it.name, it.name) },
             selectedOptionId = uiModel.currency.name,
             onSelect = { option ->
@@ -135,7 +137,7 @@ fun TransactionsFormUiComposer(
 
     if (uiModel.isCategoryPickerOpen) {
         OptionsBottomSheet(
-            title = "Category",
+            title = stringResource(R.string.form_label_category),
             options = TransactionCategory.values().map { PickerOption(it.name, it.label) },
             selectedOptionId = uiModel.category.name,
             onSelect = { option ->
@@ -159,12 +161,12 @@ fun TransactionsFormUiComposer(
                         ?: uiModel.occurredAtEpochMs
                     onEvent(TransactionsFormEvent.DateSelected(picked))
                 }) {
-                    Text("OK")
+                    Text(stringResource(R.string.form_date_picker_ok))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { onEvent(TransactionsFormEvent.DismissDatePicker) }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.form_date_picker_cancel))
                 }
             },
         ) {
@@ -196,9 +198,10 @@ private fun AmountField(
 
 @Composable
 private fun buildAmountLabel(): androidx.compose.ui.text.AnnotatedString {
+    val label = stringResource(R.string.form_label_amount)
     val color = MaterialTheme.colorScheme.error
     return androidx.compose.ui.text.buildAnnotatedString {
-        append("Amount ")
+        append("$label ")
         pushStyle(androidx.compose.ui.text.SpanStyle(color = color))
         append("*")
         pop()
@@ -214,7 +217,7 @@ private fun DescriptionField(
     TextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text("Description") },
+        label = { Text(stringResource(R.string.form_label_description)) },
         modifier = Modifier.fillMaxWidth(),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,

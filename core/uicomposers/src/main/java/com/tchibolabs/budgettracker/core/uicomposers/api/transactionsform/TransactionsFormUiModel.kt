@@ -1,21 +1,20 @@
 package com.tchibolabs.budgettracker.core.uicomposers.api.transactionsform
 
-import androidx.compose.ui.graphics.Color
 import com.tchibolabs.budgettracker.core.data.api.model.Currency
 import com.tchibolabs.budgettracker.core.uisystem.api.UiModel
 
-enum class TransactionCategory(val isIncome: Boolean, val color: Color) {
-    GROCERIES(false, Color(0xFF4CAF50)),
-    RENT(false, Color(0xFF2196F3)),
-    BILLS(false, Color(0xFFF44336)),
-    TRANSPORTATION(false, Color(0xFFFF9800)),
-    SUBSCRIPTIONS(false, Color(0xFF9C27B0)),
-    ENTERTAINMENT(false, Color(0xFFE91E63)),
-    HEALTHCARE(false, Color(0xFF00BCD4)),
-    EMERGENCIES(false, Color(0xFF795548)),
-    SALARY(true, Color(0xFF8BC34A)),
-    REVENUE(true, Color(0xFFCDDC39)),
-    OTHER(false, Color(0xFF9E9E9E));
+enum class TransactionCategory(val isIncome: Boolean) {
+    GROCERIES(false),
+    RENT(false),
+    BILLS(false),
+    TRANSPORTATION(false),
+    SUBSCRIPTIONS(false),
+    ENTERTAINMENT(false),
+    HEALTHCARE(false),
+    EMERGENCIES(false),
+    SALARY(true),
+    REVENUE(true),
+    OTHER(false);
 
     val label: String
         get() = name.lowercase().replaceFirstChar { it.uppercase() }

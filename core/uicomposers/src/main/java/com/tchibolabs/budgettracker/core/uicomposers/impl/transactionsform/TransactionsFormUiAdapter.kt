@@ -13,7 +13,9 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -26,6 +28,9 @@ class TransactionsFormUiAdapter @Inject constructor(
 
     private val _uiModel = MutableStateFlow(TransactionsFormUiModel.Initial)
     override val uiModel: StateFlow<TransactionsFormUiModel> = _uiModel.asStateFlow()
+
+    private val _saveError = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val saveError: SharedFlow<Unit> = _saveError
 
     fun load(id: Long?) {
         if (id == null) {
@@ -101,6 +106,7 @@ class TransactionsFormUiAdapter @Inject constructor(
                 )
                 repository.upsert(transaction)
             }.isSuccess
+            if (!savedSuccessfully) _saveError.tryEmit(Unit)
             _uiModel.update { it.copy(isSaving = false, saved = savedSuccessfully) }
         }
     }

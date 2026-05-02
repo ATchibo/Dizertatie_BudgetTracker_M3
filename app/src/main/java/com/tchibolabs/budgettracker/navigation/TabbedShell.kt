@@ -62,7 +62,6 @@ fun TabbedShell(
             )
             BudgetTab.Dashboard -> DashboardEntryPoint(
                 modifier = contentModifier,
-                onNavigate = onNavigate,
             )
         }
     }

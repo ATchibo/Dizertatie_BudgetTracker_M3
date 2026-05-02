@@ -28,7 +28,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import com.tchibolabs.budgettracker.feature.dashboard.R
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,13 +42,13 @@ import com.tchibolabs.budgettracker.core.design.api.components.OptionsBottomShee
 import com.tchibolabs.budgettracker.core.design.api.components.PickerOption
 import com.tchibolabs.budgettracker.core.design.api.components.PieChart
 import com.tchibolabs.budgettracker.core.design.api.theme.BudgetTrackerTheme
-import com.tchibolabs.budgettracker.core.navigation.api.BudgetRoute
 import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.CategoryBreakdown
 import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.CurrencyMode
 import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.DashboardEvent
 import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.DashboardUiModel
 import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.dashboardLabel
 import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.label
+import com.tchibolabs.budgettracker.core.uicomposers.api.formatAmount
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListUiComposer
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionRow
 import com.tchibolabs.budgettracker.core.uicomposers.impl.dashboard.DashboardUiAdapter
@@ -55,7 +57,6 @@ import com.tchibolabs.budgettracker.core.uicomposers.impl.dashboard.DashboardUiA
 @Composable
 fun DashboardEntryPoint(
     modifier: Modifier = Modifier,
-    onNavigate: (BudgetRoute) -> Unit,
     adapter: DashboardUiAdapter = hiltViewModel(),
 ) {
     val uiModel by adapter.uiModel.collectAsStateWithLifecycle()
@@ -65,7 +66,7 @@ fun DashboardEntryPoint(
         adapter.conversionError.collect {
             Toast.makeText(
                 context,
-                "Currency conversion failed. Switched back to 'Selected only'.",
+                context.getString(R.string.dashboard_conversion_error),
                 Toast.LENGTH_LONG,
             ).show()
         }
@@ -103,13 +104,13 @@ private fun DashboardScreen(
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     FilterChipCard(
-                        label = "Time Period",
+                        label = stringResource(R.string.dashboard_filter_period),
                         value = uiModel.period.dashboardLabel,
                         onClick = { onEvent(DashboardEvent.OpenPicker(DashboardUiModel.PICKER_PERIOD)) },
                         modifier = Modifier.weight(1f),
                     )
                     FilterChipCard(
-                        label = "Currency",
+                        label = stringResource(R.string.dashboard_filter_currency),
                         value = uiModel.currency.name,
                         onClick = { onEvent(DashboardEvent.OpenPicker(DashboardUiModel.PICKER_CURRENCY)) },
                         modifier = Modifier.weight(1f),
@@ -118,27 +119,27 @@ private fun DashboardScreen(
             }
             item {
                 FilterChipCard(
-                    label = "Currency Mode",
+                    label = stringResource(R.string.dashboard_filter_currency_mode),
                     value = uiModel.currencyMode.label,
                     onClick = { onEvent(DashboardEvent.OpenPicker(DashboardUiModel.PICKER_CURRENCY_MODE)) },
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
             item {
-                TotalsCard(label = "Total Income", amount = uiModel.totalIncome, currency = uiModel.displayCurrency)
+                TotalsCard(label = stringResource(R.string.dashboard_total_income), amount = uiModel.totalIncome, currency = uiModel.displayCurrency)
             }
             item {
-                TotalsCard(label = "Total Costs", amount = uiModel.totalCosts, currency = uiModel.displayCurrency)
+                TotalsCard(label = stringResource(R.string.dashboard_total_costs), amount = uiModel.totalCosts, currency = uiModel.displayCurrency)
             }
             item {
-                TotalsCard(label = "Total Balance", amount = uiModel.totalBalance, currency = uiModel.displayCurrency)
+                TotalsCard(label = stringResource(R.string.dashboard_total_balance), amount = uiModel.totalBalance, currency = uiModel.displayCurrency)
             }
             item {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
             if (uiModel.costsBreakdown.isNotEmpty()) {
                 item {
-                    CategorySection(title = "Costs by category") {
+                    CategorySection(title = stringResource(R.string.dashboard_section_costs_by_category)) {
                         CostsDonut(uiModel = uiModel)
                         BreakdownLegend(breakdown = uiModel.costsBreakdown)
                     }
@@ -146,7 +147,7 @@ private fun DashboardScreen(
             }
             item {
                 TransactionListUiComposer(
-                    title = "Top 5 Costs",
+                    title = stringResource(R.string.dashboard_top_costs),
                     rows = uiModel.topCosts,
                 )
             }
@@ -155,14 +156,14 @@ private fun DashboardScreen(
             }
             if (uiModel.incomeBreakdown.isNotEmpty()) {
                 item {
-                    CategorySection(title = "Income by category") {
+                    CategorySection(title = stringResource(R.string.dashboard_section_income_by_category)) {
                         IncomePie(uiModel = uiModel)
                     }
                 }
             }
             item {
                 TransactionListUiComposer(
-                    title = "Top 5 Income",
+                    title = stringResource(R.string.dashboard_top_income),
                     rows = uiModel.topIncome,
                 )
             }
@@ -170,21 +171,21 @@ private fun DashboardScreen(
 
         when (uiModel.openPickerId) {
             DashboardUiModel.PICKER_PERIOD -> OptionsBottomSheet(
-                title = "Time Period",
+                title = stringResource(R.string.dashboard_filter_period),
                 options = TransactionPeriod.values().map { PickerOption(it.name, it.dashboardLabel) },
                 selectedOptionId = uiModel.period.name,
                 onSelect = { onEvent(DashboardEvent.SelectOption(DashboardUiModel.PICKER_PERIOD, it.id)) },
                 onDismiss = { onEvent(DashboardEvent.ClosePicker(DashboardUiModel.PICKER_PERIOD)) },
             )
             DashboardUiModel.PICKER_CURRENCY -> OptionsBottomSheet(
-                title = "Currency",
+                title = stringResource(R.string.dashboard_filter_currency),
                 options = Currency.values().map { PickerOption(it.name, it.name) },
                 selectedOptionId = uiModel.currency.name,
                 onSelect = { onEvent(DashboardEvent.SelectOption(DashboardUiModel.PICKER_CURRENCY, it.id)) },
                 onDismiss = { onEvent(DashboardEvent.ClosePicker(DashboardUiModel.PICKER_CURRENCY)) },
             )
             DashboardUiModel.PICKER_CURRENCY_MODE -> OptionsBottomSheet(
-                title = "Currency Mode",
+                title = stringResource(R.string.dashboard_filter_currency_mode),
                 options = CurrencyMode.values().map { PickerOption(it.name, it.label) },
                 selectedOptionId = uiModel.currencyMode.name,
                 onSelect = { onEvent(DashboardEvent.SelectOption(DashboardUiModel.PICKER_CURRENCY_MODE, it.id)) },
@@ -320,9 +321,6 @@ private fun LegendRow(
         )
     }
 }
-
-private fun Double.formatAmount(): String =
-    if (this == this.toLong().toDouble()) "${this.toLong()}.0" else "%.2f".format(this)
 
 @Preview
 @Composable

@@ -19,9 +19,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.tchibolabs.budgettracker.core.design.R
 import com.tchibolabs.budgettracker.core.design.api.theme.BudgetTrackerTheme
 
 @Composable
@@ -83,14 +85,14 @@ fun TransactionCard(
                         IconButton(onClick = onEdit, modifier = Modifier.size(36.dp)) {
                             Icon(
                                 imageVector = Icons.Filled.EditNote,
-                                contentDescription = "Edit",
+                                contentDescription = stringResource(R.string.transaction_card_edit_cd),
                                 tint = MaterialTheme.colorScheme.onSurface,
                             )
                         }
                         IconButton(onClick = onDelete, modifier = Modifier.size(36.dp)) {
                             Icon(
                                 imageVector = Icons.Filled.Delete,
-                                contentDescription = "Delete",
+                                contentDescription = stringResource(R.string.transaction_card_delete_cd),
                                 tint = MaterialTheme.colorScheme.error,
                             )
                         }

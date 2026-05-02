@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TransactionsFormUiComposer -->
+    <string name="form_title_add">Add Transaction</string>
+    <string name="form_title_edit">Edit Transaction</string>
+    <string name="form_label_currency">Currency</string>
+    <string name="form_label_category">Category</string>
+    <string name="form_label_date">Date</string>
+    <string name="form_label_description">Description</string>
+    <string name="form_label_amount">Amount</string>
+    <string name="form_button_saving">Saving…</string>
+    <string name="form_button_save">Save</string>
+    <string name="form_date_picker_ok">OK</string>
+    <string name="form_date_picker_cancel">Cancel</string>
+
+    <!-- TransactionsUiComposer -->
+    <string name="transactions_add_cd">Add transaction</string>
+    <string name="transactions_delete_title">Delete transaction?</string>
+    <string name="transactions_delete_message">This action cannot be undone.</string>
+    <string name="transactions_delete_confirm">Delete</string>
+    <string name="transactions_delete_cancel">Cancel</string>
+</resources>

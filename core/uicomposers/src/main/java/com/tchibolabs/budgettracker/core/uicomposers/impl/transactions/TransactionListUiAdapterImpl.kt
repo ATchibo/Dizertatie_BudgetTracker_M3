@@ -1,5 +1,6 @@
 package com.tchibolabs.budgettracker.core.uicomposers.impl.transactions
 
+import com.tchibolabs.budgettracker.core.uicomposers.api.formatAmount
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListScope
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListSourceRow
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListUiAdapter
@@ -8,7 +9,6 @@ import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.Transactio
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import java.util.Locale
 import javax.inject.Inject
 
 class TransactionListUiAdapterProvider @Inject constructor(
@@ -32,9 +32,6 @@ class TransactionListUiAdapterImpl @AssistedInject constructor(
             isIncome = row.isIncome,
         )
     }
-
-    private fun Double.formatAmount(): String =
-        if (this == this.toLong().toDouble()) "${this.toLong()}.0" else String.format(Locale.getDefault(), "%.2f", this)
 
     @AssistedFactory
     interface Factory {

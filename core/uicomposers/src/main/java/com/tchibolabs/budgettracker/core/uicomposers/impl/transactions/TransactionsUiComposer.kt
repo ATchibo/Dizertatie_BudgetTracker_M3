@@ -19,8 +19,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.tchibolabs.budgettracker.core.uicomposers.R
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionOrder
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionPeriod
 import com.tchibolabs.budgettracker.core.design.api.components.FilterChipCard
@@ -87,7 +89,7 @@ fun TransactionsUiComposer(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         ) {
-            Icon(Icons.Filled.Add, contentDescription = "Add transaction")
+            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.transactions_add_cd))
         }
 
         uiModel.filters.firstOrNull { it.isPickerOpen }?.let { filter ->
@@ -105,16 +107,16 @@ fun TransactionsUiComposer(
         if (uiModel.pendingDeleteId != null) {
             AlertDialog(
                 onDismissRequest = { onEvent(TransactionsEvent.CancelDelete) },
-                title = { Text("Delete transaction?") },
-                text = { Text("This action cannot be undone.") },
+                title = { Text(stringResource(R.string.transactions_delete_title)) },
+                text = { Text(stringResource(R.string.transactions_delete_message)) },
                 confirmButton = {
                     TextButton(onClick = { onEvent(TransactionsEvent.ConfirmDelete) }) {
-                        Text("Delete")
+                        Text(stringResource(R.string.transactions_delete_confirm))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { onEvent(TransactionsEvent.CancelDelete) }) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.transactions_delete_cancel))
                     }
                 },
             )

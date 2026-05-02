@@ -123,6 +123,9 @@ class DashboardUiAdapter @Inject constructor(
         val cutoff = inputs.period.cutoffMs()
         val withinPeriod = inputs.all.filter { cutoff == null || it.occurredAtEpochMs >= cutoff }
         val effectiveMode = ensureRates(inputs, withinPeriod)
+        if (effectiveMode != inputs.mode) {
+            scope.launch { currencyMode.value = effectiveMode }
+        }
 
         val resolved = withinPeriod.mapNotNull { tx ->
             val resolvedAmount = when (effectiveMode) {
@@ -177,7 +180,6 @@ class DashboardUiAdapter @Inject constructor(
         for (source in uniqueSources) {
             if (rates.convert(1.0, source, inputs.currency.name) == null) {
                 if (rates.refresh(source).isFailure) {
-                    currencyMode.value = CurrencyMode.SELECTED_ONLY
                     _conversionError.tryEmit(Unit)
                     return CurrencyMode.SELECTED_ONLY
                 }

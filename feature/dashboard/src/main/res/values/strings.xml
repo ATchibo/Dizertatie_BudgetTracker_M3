@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dashboard_filter_period">Time Period</string>
+    <string name="dashboard_filter_currency">Currency</string>
+    <string name="dashboard_filter_currency_mode">Currency Mode</string>
+    <string name="dashboard_total_income">Total Income</string>
+    <string name="dashboard_total_costs">Total Costs</string>
+    <string name="dashboard_total_balance">Total Balance</string>
+    <string name="dashboard_section_costs_by_category">Costs by category</string>
+    <string name="dashboard_section_income_by_category">Income by category</string>
+    <string name="dashboard_top_costs">Top 5 Costs</string>
+    <string name="dashboard_top_income">Top 5 Income</string>
+    <string name="dashboard_conversion_error">Currency conversion failed. Switched back to \'Selected only\'.</string>
+</resources>

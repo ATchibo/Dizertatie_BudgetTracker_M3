@@ -5,14 +5,14 @@ import com.tchibolabs.budgettracker.core.uicomposers.impl.transactions.Transacti
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import dagger.hilt.android.components.ActivityRetainedComponent
+import dagger.hilt.android.scopes.ActivityRetainedScoped
 
 @Module
-@InstallIn(SingletonComponent::class)
+@InstallIn(ActivityRetainedComponent::class)
 abstract class TransactionListAdapterModule {
     @Binds
-    @Singleton
+    @ActivityRetainedScoped
     abstract fun bindTransactionListUiAdapterFactory(
         provider: TransactionListUiAdapterProvider,
     ): TransactionListUiAdapterFactory
