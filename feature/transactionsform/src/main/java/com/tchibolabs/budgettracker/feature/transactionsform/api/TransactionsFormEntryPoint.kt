@@ -27,12 +27,14 @@ fun TransactionsFormEntryPoint(
             Toast.makeText(context, context.getString(R.string.form_save_error), Toast.LENGTH_SHORT).show()
         }
     }
+    LaunchedEffect(adapter) {
+        adapter.saved.collect { onNavigate(BudgetRoute.Transactions) }
+    }
     val uiModel by adapter.uiModel.collectAsStateWithLifecycle()
     TransactionsFormUiComposer(
         uiModel = uiModel,
         modifier = modifier,
         onEvent = { adapter.onEvent(it) },
-        onSaved = { onNavigate(BudgetRoute.Transactions) },
         onCancel = { onNavigate(BudgetRoute.Transactions) },
     )
 }

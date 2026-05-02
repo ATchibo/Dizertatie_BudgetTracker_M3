@@ -10,6 +10,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import com.tchibolabs.budgettracker.R
+import com.tchibolabs.budgettracker.core.design.api.theme.BudgetTrackerTheme
 import com.tchibolabs.budgettracker.core.design.api.components.BottomBarItem
 import com.tchibolabs.budgettracker.core.design.api.components.BudgetBottomBar
 import com.tchibolabs.budgettracker.core.design.api.components.BudgetTopAppBar
@@ -22,23 +26,26 @@ fun TabbedShell(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    val items = remember {
+    val transactionsLabel = stringResource(R.string.tab_transactions)
+    val dashboardLabel = stringResource(R.string.tab_dashboard)
+    val appName = stringResource(R.string.app_name)
+    val items = remember(transactionsLabel, dashboardLabel) {
         listOf(
             BottomBarItem(
                 key = BudgetTab.Transactions.routeKey,
-                label = "Transactions",
+                label = transactionsLabel,
                 icon = Icons.AutoMirrored.Filled.List,
             ),
             BottomBarItem(
                 key = BudgetTab.Dashboard.routeKey,
-                label = "Dashboard",
+                label = dashboardLabel,
                 icon = Icons.Filled.GridView,
             ),
         )
     }
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = { BudgetTopAppBar(title = "BudgetTracker") },
+        topBar = { BudgetTopAppBar(title = appName) },
         bottomBar = {
             BudgetBottomBar(
                 items = items,
@@ -57,5 +64,16 @@ fun TabbedShell(
         ) {
             content()
         }
+    }
+}
+
+@Preview
+@Composable
+private fun TabbedShellPreview() {
+    BudgetTrackerTheme {
+        TabbedShell(
+            selectedTab = BudgetTab.Transactions,
+            onSelectTab = {},
+        ) {}
     }
 }

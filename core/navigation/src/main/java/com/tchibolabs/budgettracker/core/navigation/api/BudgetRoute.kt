@@ -7,9 +7,6 @@ import kotlinx.serialization.Serializable
 sealed interface BudgetRoute : NavKey {
 
     @Serializable
-    data object Home : BudgetRoute
-
-    @Serializable
     data object Dashboard : BudgetRoute
 
     @Serializable

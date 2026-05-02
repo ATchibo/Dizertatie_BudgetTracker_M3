@@ -31,7 +31,6 @@ data class TransactionsFormUiModel(
     val isCategoryPickerOpen: Boolean,
     val isDatePickerOpen: Boolean,
     val isSaving: Boolean,
-    val saved: Boolean,
 ) : UiModel {
     val isValid: Boolean
         get() = amountText.toDoubleOrNull()?.let { it > 0.0 } == true
@@ -48,7 +47,6 @@ data class TransactionsFormUiModel(
             isCategoryPickerOpen = false,
             isDatePickerOpen = false,
             isSaving = false,
-            saved = false,
         )
     }
 }

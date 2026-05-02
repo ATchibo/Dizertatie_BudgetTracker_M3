@@ -13,11 +13,11 @@ import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.Transactio
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsEvent
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsFilter
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsUiModel
+import com.tchibolabs.budgettracker.core.uicomposers.api.cutoffMs
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.label
 import com.tchibolabs.budgettracker.core.uisystem.api.UiAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -124,19 +124,6 @@ class TransactionsUiAdapter @Inject constructor(
                 filtered.sortedWith(compareByDescending<Transaction> { it.occurredAtEpochMs }.thenByDescending { it.id })
             TransactionOrder.DATE_ASC ->
                 filtered.sortedWith(compareBy<Transaction> { it.occurredAtEpochMs }.thenByDescending { it.id })
-        }
-    }
-
-    private fun TransactionPeriod.cutoffMs(): Long? {
-        val zone = ZoneId.systemDefault()
-        val today = LocalDate.now(zone)
-        return when (this) {
-            TransactionPeriod.TODAY -> today.atStartOfDay(zone).toInstant().toEpochMilli()
-            TransactionPeriod.PAST_7_DAYS -> today.minusDays(7).atStartOfDay(zone).toInstant().toEpochMilli()
-            TransactionPeriod.PAST_31_DAYS -> today.minusDays(31).atStartOfDay(zone).toInstant().toEpochMilli()
-            TransactionPeriod.PAST_YEAR -> today.minusYears(1).atStartOfDay(zone).toInstant().toEpochMilli()
-            TransactionPeriod.CURRENT_MONTH -> today.withDayOfMonth(1).atStartOfDay(zone).toInstant().toEpochMilli()
-            TransactionPeriod.ALL_TIME -> null
         }
     }
 

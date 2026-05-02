@@ -13,6 +13,9 @@
     <string name="form_date_picker_ok">OK</string>
     <string name="form_date_picker_cancel">Cancel</string>
 
+    <!-- TransactionListUiComposer -->
+    <string name="transactions_empty_message">No transactions found</string>
+
     <!-- TransactionsUiComposer -->
     <string name="transactions_add_cd">Add transaction</string>
     <string name="transactions_delete_title">Delete transaction?</string>

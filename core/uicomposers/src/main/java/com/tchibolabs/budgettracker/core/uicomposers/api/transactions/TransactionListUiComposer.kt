@@ -9,17 +9,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tchibolabs.budgettracker.core.design.api.components.TransactionCard
 import com.tchibolabs.budgettracker.core.design.api.theme.BudgetTrackerTheme
+import com.tchibolabs.budgettracker.core.uicomposers.R
 
 @Composable
 fun TransactionListUiComposer(
     title: String,
     rows: List<TransactionRow>,
     modifier: Modifier = Modifier,
-    emptyMessage: String = "No transactions found",
+    emptyMessage: String? = null,
     onRowClick: ((Long) -> Unit)? = null,
     onRowEdit: ((Long) -> Unit)? = null,
     onRowDelete: ((Long) -> Unit)? = null,
@@ -35,7 +37,7 @@ fun TransactionListUiComposer(
         )
         if (rows.isEmpty()) {
             Text(
-                text = emptyMessage,
+                text = emptyMessage ?: stringResource(R.string.transactions_empty_message),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

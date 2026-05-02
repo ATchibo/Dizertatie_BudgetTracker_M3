@@ -15,10 +15,10 @@ import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.Transactio
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListSourceRow
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListUiAdapter
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListUiAdapterFactory
+import com.tchibolabs.budgettracker.core.uicomposers.api.cutoffMs
 import com.tchibolabs.budgettracker.core.uisystem.api.UiAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -30,7 +30,9 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -80,6 +82,8 @@ class DashboardUiAdapter @Inject constructor(
         refreshCount,
     ) { inputs, _ -> inputs }
         .mapLatest { compute(it) }
+        .onEach { (_, correction) -> correction?.let { currencyMode.value = it } }
+        .map { it.first }
         .combine(isRefreshing) { model, refreshing ->
             model.copy(isRefreshing = refreshing)
         }
@@ -119,13 +123,11 @@ class DashboardUiAdapter @Inject constructor(
         }
     }
 
-    private suspend fun compute(inputs: Inputs): DashboardUiModel {
+    private suspend fun compute(inputs: Inputs): Pair<DashboardUiModel, CurrencyMode?> {
         val cutoff = inputs.period.cutoffMs()
         val withinPeriod = inputs.all.filter { cutoff == null || it.occurredAtEpochMs >= cutoff }
         val effectiveMode = ensureRates(inputs, withinPeriod)
-        if (effectiveMode != inputs.mode) {
-            scope.launch { currencyMode.value = effectiveMode }
-        }
+        val modeCorrection = if (effectiveMode != inputs.mode) effectiveMode else null
 
         val resolved = withinPeriod.mapNotNull { tx ->
             val resolvedAmount = when (effectiveMode) {
@@ -154,7 +156,7 @@ class DashboardUiAdapter @Inject constructor(
             .map { it.toSourceRow(inputs.currency) }
             .let(transactionListUiAdapter::composeRows)
 
-        return DashboardUiModel(
+        val model = DashboardUiModel(
             period = inputs.period,
             currency = inputs.currency,
             currencyMode = effectiveMode,
@@ -169,6 +171,7 @@ class DashboardUiAdapter @Inject constructor(
             isLoading = false,
             isRefreshing = false,
         )
+        return model to modeCorrection
     }
 
     private suspend fun ensureRates(inputs: Inputs, transactions: List<Transaction>): CurrencyMode {
@@ -200,19 +203,6 @@ class DashboardUiAdapter @Inject constructor(
                     color = palette[index % palette.size],
                 )
             }
-
-    private fun TransactionPeriod.cutoffMs(): Long? {
-        val zone = ZoneId.systemDefault()
-        val today = LocalDate.now(zone)
-        return when (this) {
-            TransactionPeriod.TODAY -> today.atStartOfDay(zone).toInstant().toEpochMilli()
-            TransactionPeriod.PAST_7_DAYS -> today.minusDays(7).atStartOfDay(zone).toInstant().toEpochMilli()
-            TransactionPeriod.PAST_31_DAYS -> today.minusDays(31).atStartOfDay(zone).toInstant().toEpochMilli()
-            TransactionPeriod.PAST_YEAR -> today.minusYears(1).atStartOfDay(zone).toInstant().toEpochMilli()
-            TransactionPeriod.CURRENT_MONTH -> today.withDayOfMonth(1).atStartOfDay(zone).toInstant().toEpochMilli()
-            TransactionPeriod.ALL_TIME -> null
-        }
-    }
 
     private fun Pair<Transaction, Double>.toSourceRow(displayCurrency: Currency): TransactionListSourceRow {
         val transaction = first

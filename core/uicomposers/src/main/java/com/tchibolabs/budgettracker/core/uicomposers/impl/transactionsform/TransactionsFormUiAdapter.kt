@@ -32,6 +32,9 @@ class TransactionsFormUiAdapter @Inject constructor(
     private val _saveError = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val saveError: SharedFlow<Unit> = _saveError
 
+    private val _saved = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val saved: SharedFlow<Unit> = _saved
+
     fun load(id: Long?) {
         if (id == null) {
             _uiModel.value = TransactionsFormUiModel.Initial
@@ -50,7 +53,6 @@ class TransactionsFormUiAdapter @Inject constructor(
                 isCategoryPickerOpen = false,
                 isDatePickerOpen = false,
                 isSaving = false,
-                saved = false,
             )
         }
     }
@@ -106,8 +108,8 @@ class TransactionsFormUiAdapter @Inject constructor(
                 )
                 repository.upsert(transaction)
             }.isSuccess
-            if (!savedSuccessfully) _saveError.tryEmit(Unit)
-            _uiModel.update { it.copy(isSaving = false, saved = savedSuccessfully) }
+            if (savedSuccessfully) _saved.tryEmit(Unit) else _saveError.tryEmit(Unit)
+            _uiModel.update { it.copy(isSaving = false) }
         }
     }
 
