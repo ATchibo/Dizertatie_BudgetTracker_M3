@@ -65,7 +65,14 @@
       "Bash(javap -p androidx/navigation3/runtime/EntryProviderScope.class)",
       "Bash(grep -v \"^\\\\.$\")",
       "Bash(javap -p /home/tchibo/.gradle/caches/9.1.0/transforms/0d2b3a553c27a44a59c46b0557117e12/transformed/lifecycle-viewmodel-navigation3-api.jar/androidx/lifecycle/viewmodel/navigation3/ViewModelStoreNavEntryDecoratorKt.class)",
-      "Bash(./gradlew :app:compileDebugKotlin)"
+      "Bash(./gradlew :app:compileDebugKotlin)",
+      "Bash(awk '$1 < 10 && $1 > 0 {print}')",
+      "Bash(xargs -I {} find {} -type d -empty)",
+      "Bash(./gradlew :core:uicomposers:assembleDebug)",
+      "Bash(./gradlew :core:uicomposers:test)",
+      "Bash(./gradlew :core:uicomposers:test --tests \"com.tchibolabs.budgettracker.core.uicomposers.impl.transactions.TransactionsUiAdapterTest.PAST_31_DAYS*\" --tests \"com.tchibolabs.budgettracker.core.uicomposers.impl.transactions.TransactionsUiAdapterTest.AMOUNT_DESC*\")",
+      "Bash(./gradlew :core:uicomposers:testDebugUnitTest)",
+      "Bash(grep -v \"^--$\")"
     ]
   }
 }

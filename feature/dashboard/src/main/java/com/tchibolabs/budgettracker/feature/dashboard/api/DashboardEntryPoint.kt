@@ -46,9 +46,8 @@ import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.CategoryBreak
 import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.CurrencyMode
 import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.DashboardEvent
 import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.DashboardUiModel
-import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.dashboardLabel
-import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.label
 import com.tchibolabs.budgettracker.core.uicomposers.api.formatAmount
+import com.tchibolabs.budgettracker.core.uicomposers.R as UiR
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListUiComposer
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionRow
 import com.tchibolabs.budgettracker.core.uicomposers.impl.dashboard.DashboardUiAdapter
@@ -105,7 +104,7 @@ private fun DashboardScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     FilterChipCard(
                         label = stringResource(R.string.dashboard_filter_period),
-                        value = uiModel.period.dashboardLabel,
+                        value = uiModel.period.toLabel(),
                         onClick = { onEvent(DashboardEvent.OpenPicker(DashboardUiModel.PICKER_PERIOD)) },
                         modifier = Modifier.weight(1f),
                     )
@@ -120,7 +119,7 @@ private fun DashboardScreen(
             item {
                 FilterChipCard(
                     label = stringResource(R.string.dashboard_filter_currency_mode),
-                    value = uiModel.currencyMode.label,
+                    value = uiModel.currencyMode.toLabel(),
                     onClick = { onEvent(DashboardEvent.OpenPicker(DashboardUiModel.PICKER_CURRENCY_MODE)) },
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -172,7 +171,7 @@ private fun DashboardScreen(
         when (uiModel.openPickerId) {
             DashboardUiModel.PICKER_PERIOD -> OptionsBottomSheet(
                 title = stringResource(R.string.dashboard_filter_period),
-                options = TransactionPeriod.values().map { PickerOption(it.name, it.dashboardLabel) },
+                options = periodPickerOptions(),
                 selectedOptionId = uiModel.period.name,
                 onSelect = { onEvent(DashboardEvent.SelectOption(DashboardUiModel.PICKER_PERIOD, it.id)) },
                 onDismiss = { onEvent(DashboardEvent.ClosePicker(DashboardUiModel.PICKER_PERIOD)) },
@@ -186,7 +185,7 @@ private fun DashboardScreen(
             )
             DashboardUiModel.PICKER_CURRENCY_MODE -> OptionsBottomSheet(
                 title = stringResource(R.string.dashboard_filter_currency_mode),
-                options = CurrencyMode.values().map { PickerOption(it.name, it.label) },
+                options = currencyModePickerOptions(),
                 selectedOptionId = uiModel.currencyMode.name,
                 onSelect = { onEvent(DashboardEvent.SelectOption(DashboardUiModel.PICKER_CURRENCY_MODE, it.id)) },
                 onDismiss = { onEvent(DashboardEvent.ClosePicker(DashboardUiModel.PICKER_CURRENCY_MODE)) },
@@ -321,6 +320,38 @@ private fun LegendRow(
         )
     }
 }
+
+@Composable
+private fun TransactionPeriod.toLabel(): String = when (this) {
+    TransactionPeriod.TODAY -> stringResource(UiR.string.period_today)
+    TransactionPeriod.PAST_7_DAYS -> stringResource(UiR.string.period_past_7_days)
+    TransactionPeriod.PAST_31_DAYS -> stringResource(UiR.string.period_past_31_days)
+    TransactionPeriod.PAST_YEAR -> stringResource(UiR.string.period_past_year)
+    TransactionPeriod.CURRENT_MONTH -> stringResource(UiR.string.period_current_month)
+    TransactionPeriod.ALL_TIME -> stringResource(UiR.string.period_all_time)
+}
+
+@Composable
+private fun CurrencyMode.toLabel(): String = when (this) {
+    CurrencyMode.SELECTED_ONLY -> stringResource(R.string.currency_mode_selected_only)
+    CurrencyMode.ALL_CONVERTED -> stringResource(R.string.currency_mode_all_converted)
+}
+
+@Composable
+private fun periodPickerOptions(): List<PickerOption> = listOf(
+    PickerOption(TransactionPeriod.TODAY.name, stringResource(UiR.string.period_today)),
+    PickerOption(TransactionPeriod.PAST_7_DAYS.name, stringResource(UiR.string.period_past_7_days)),
+    PickerOption(TransactionPeriod.PAST_31_DAYS.name, stringResource(UiR.string.period_past_31_days)),
+    PickerOption(TransactionPeriod.PAST_YEAR.name, stringResource(UiR.string.period_past_year)),
+    PickerOption(TransactionPeriod.CURRENT_MONTH.name, stringResource(UiR.string.period_current_month)),
+    PickerOption(TransactionPeriod.ALL_TIME.name, stringResource(UiR.string.period_all_time)),
+)
+
+@Composable
+private fun currencyModePickerOptions(): List<PickerOption> = listOf(
+    PickerOption(CurrencyMode.SELECTED_ONLY.name, stringResource(R.string.currency_mode_selected_only)),
+    PickerOption(CurrencyMode.ALL_CONVERTED.name, stringResource(R.string.currency_mode_all_converted)),
+)
 
 @Preview
 @Composable

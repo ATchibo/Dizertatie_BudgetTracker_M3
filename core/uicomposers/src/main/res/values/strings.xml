@@ -16,6 +16,24 @@
     <!-- TransactionListUiComposer -->
     <string name="transactions_empty_message">No transactions found</string>
 
+    <!-- TransactionsUiAdapter filter headers -->
+    <string name="transactions_filter_period_label">Time Period</string>
+    <string name="transactions_filter_order_label">Order</string>
+
+    <!-- TransactionPeriod labels (shared) -->
+    <string name="period_today">Today</string>
+    <string name="period_past_7_days">Past 7 days</string>
+    <string name="period_past_31_days">Past 31 days</string>
+    <string name="period_past_year">Past year</string>
+    <string name="period_current_month">Current month</string>
+    <string name="period_all_time">All time</string>
+
+    <!-- TransactionOrder labels -->
+    <string name="order_date_oldest_first">Date (Oldest first)</string>
+    <string name="order_date_newest_first">Date (Newest first)</string>
+    <string name="order_amount_ascending">Amount (Ascending)</string>
+    <string name="order_amount_descending">Amount (Descending)</string>
+
     <!-- TransactionsUiComposer -->
     <string name="transactions_add_cd">Add transaction</string>
     <string name="transactions_delete_title">Delete transaction?</string>

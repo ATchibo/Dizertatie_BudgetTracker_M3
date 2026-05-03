@@ -9,22 +9,6 @@ import com.tchibolabs.budgettracker.core.uisystem.api.UiModel
 
 enum class CurrencyMode { SELECTED_ONLY, ALL_CONVERTED }
 
-val CurrencyMode.label: String
-    get() = when (this) {
-        CurrencyMode.SELECTED_ONLY -> "Selected only"
-        CurrencyMode.ALL_CONVERTED -> "All (converted)"
-    }
-
-val TransactionPeriod.dashboardLabel: String
-    get() = when (this) {
-        TransactionPeriod.TODAY -> "Today"
-        TransactionPeriod.PAST_7_DAYS -> "Past 7 days"
-        TransactionPeriod.PAST_31_DAYS -> "Past 31 days"
-        TransactionPeriod.PAST_YEAR -> "Past year"
-        TransactionPeriod.CURRENT_MONTH -> "Current month"
-        TransactionPeriod.ALL_TIME -> "All time"
-    }
-
 data class CategoryBreakdown(
     val category: String,
     val totalAmount: Double,

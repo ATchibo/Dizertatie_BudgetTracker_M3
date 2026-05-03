@@ -1,10 +1,12 @@
 package com.tchibolabs.budgettracker.core.uicomposers.impl.transactions
 
+import android.content.Context
 import com.tchibolabs.budgettracker.core.data.api.model.Transaction
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionKind
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionOrder
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionPeriod
 import com.tchibolabs.budgettracker.core.data.api.repository.TransactionRepository
+import com.tchibolabs.budgettracker.core.uicomposers.R
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.FilterOption
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListScope
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListSourceRow
@@ -14,9 +16,9 @@ import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.Transactio
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsFilter
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsUiModel
 import com.tchibolabs.budgettracker.core.uicomposers.api.cutoffMs
-import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.label
 import com.tchibolabs.budgettracker.core.uisystem.api.UiAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -32,6 +34,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class TransactionsUiAdapter @Inject constructor(
     private val repository: TransactionRepository,
+    @ApplicationContext private val context: Context,
     transactionListUiAdapterFactory: TransactionListUiAdapterFactory,
 ) : UiAdapter<TransactionsUiModel, TransactionsEvent>() {
 
@@ -95,15 +98,27 @@ class TransactionsUiAdapter @Inject constructor(
     ): List<TransactionsFilter> = listOf(
         TransactionsFilter(
             id = TransactionsFilter.ID_PERIOD,
-            label = "Time Period",
-            options = TransactionPeriod.values().map { FilterOption(it.name, it.label) },
+            label = context.getString(R.string.transactions_filter_period_label),
+            options = listOf(
+                FilterOption(TransactionPeriod.TODAY.name, context.getString(R.string.period_today)),
+                FilterOption(TransactionPeriod.PAST_7_DAYS.name, context.getString(R.string.period_past_7_days)),
+                FilterOption(TransactionPeriod.PAST_31_DAYS.name, context.getString(R.string.period_past_31_days)),
+                FilterOption(TransactionPeriod.PAST_YEAR.name, context.getString(R.string.period_past_year)),
+                FilterOption(TransactionPeriod.CURRENT_MONTH.name, context.getString(R.string.period_current_month)),
+                FilterOption(TransactionPeriod.ALL_TIME.name, context.getString(R.string.period_all_time)),
+            ),
             selectedOptionId = currentPeriod.name,
             isPickerOpen = openId == TransactionsFilter.ID_PERIOD,
         ),
         TransactionsFilter(
             id = TransactionsFilter.ID_ORDER,
-            label = "Order",
-            options = TransactionOrder.values().map { FilterOption(it.name, it.label) },
+            label = context.getString(R.string.transactions_filter_order_label),
+            options = listOf(
+                FilterOption(TransactionOrder.DATE_ASC.name, context.getString(R.string.order_date_oldest_first)),
+                FilterOption(TransactionOrder.DATE_DESC.name, context.getString(R.string.order_date_newest_first)),
+                FilterOption(TransactionOrder.AMOUNT_ASC.name, context.getString(R.string.order_amount_ascending)),
+                FilterOption(TransactionOrder.AMOUNT_DESC.name, context.getString(R.string.order_amount_descending)),
+            ),
             selectedOptionId = currentOrder.name,
             isPickerOpen = openId == TransactionsFilter.ID_ORDER,
         ),

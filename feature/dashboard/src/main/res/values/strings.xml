@@ -11,4 +11,6 @@
     <string name="dashboard_top_costs">Top 5 Costs</string>
     <string name="dashboard_top_income">Top 5 Income</string>
     <string name="dashboard_conversion_error">Currency conversion failed. Switched back to \'Selected only\'.</string>
+    <string name="currency_mode_selected_only">Selected only</string>
+    <string name="currency_mode_all_converted">All (converted)</string>
 </resources>
