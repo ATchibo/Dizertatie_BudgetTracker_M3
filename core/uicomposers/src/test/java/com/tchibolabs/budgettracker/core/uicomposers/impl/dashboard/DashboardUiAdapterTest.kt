@@ -21,6 +21,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -127,10 +128,15 @@ class DashboardUiAdapterTest {
         coEvery { rates.convert(any(), any(), any()) } returns null
         coEvery { rates.refresh(any()) } returns Result.failure(RuntimeException("offline"))
 
+        // Activate the compute pipeline; conversionError is only emitted from within compute()
+        val pipelineJob = launch { adapter.uiModel.collect { } }
+
         adapter.conversionError.test {
             adapter.onEvent(DashboardEvent.SelectOption(DashboardUiModel.PICKER_CURRENCY_MODE, CurrencyMode.ALL_CONVERTED.name))
             awaitItem()
         }
+
+        pipelineJob.cancel()
     }
 
     // ── period filtering ───────────────────────────────────────────────────

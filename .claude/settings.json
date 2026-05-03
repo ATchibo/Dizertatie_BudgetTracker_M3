@@ -72,7 +72,10 @@
       "Bash(./gradlew :core:uicomposers:test)",
       "Bash(./gradlew :core:uicomposers:test --tests \"com.tchibolabs.budgettracker.core.uicomposers.impl.transactions.TransactionsUiAdapterTest.PAST_31_DAYS*\" --tests \"com.tchibolabs.budgettracker.core.uicomposers.impl.transactions.TransactionsUiAdapterTest.AMOUNT_DESC*\")",
       "Bash(./gradlew :core:uicomposers:testDebugUnitTest)",
-      "Bash(grep -v \"^--$\")"
+      "Bash(grep -v \"^--$\")",
+      "Bash(grep -v \"^$\")",
+      "Bash(./gradlew :core:uicomposers:testDebugUnitTest --rerun-tasks)",
+      "Bash(bc)"
     ]
   }
 }

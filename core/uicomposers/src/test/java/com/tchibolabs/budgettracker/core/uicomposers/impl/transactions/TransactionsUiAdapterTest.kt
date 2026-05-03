@@ -15,6 +15,7 @@ import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.Transactio
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionRow
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsEvent
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsFilter
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsUiModel
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -115,7 +116,7 @@ class TransactionsUiAdapterTest {
     // ── sort orders ────────────────────────────────────────────────────────
 
     @Test
-    fun `AMOUNT_DESC orders highest amount first`() = runTest(testDispatcher) {
+    fun `AMOUNT_DESC orders highest amount first`() = runTest {
         val now = System.currentTimeMillis()
         transactionsFlow.value = listOf(
             makeTransaction(id = 1, amount = 50.0, occurredAtEpochMs = now),
@@ -124,8 +125,7 @@ class TransactionsUiAdapterTest {
         )
 
         adapter.uiModel.test {
-            skipItems(1)
-            val state = awaitItem()
+            val state = firstComputedState()
             assertEquals(listOf(2L, 1L, 3L), state.rows.map { it.id })
             cancelAndIgnoreRemainingEvents()
         }
@@ -227,6 +227,11 @@ class TransactionsUiAdapterTest {
     }
 
     // ── helpers ────────────────────────────────────────────────────────────
+
+    private suspend fun app.cash.turbine.TurbineTestContext<TransactionsUiModel>.firstComputedState(): TransactionsUiModel {
+        val first = awaitItem()
+        return if (first.isLoading) awaitItem() else first
+    }
 
     private fun makeTransaction(
         id: Long,
