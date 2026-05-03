@@ -34,6 +34,19 @@
     <string name="order_amount_ascending">Amount (Ascending)</string>
     <string name="order_amount_descending">Amount (Descending)</string>
 
+    <!-- TransactionCategory labels -->
+    <string name="category_groceries">Groceries</string>
+    <string name="category_rent">Rent</string>
+    <string name="category_bills">Bills</string>
+    <string name="category_transportation">Transportation</string>
+    <string name="category_subscriptions">Subscriptions</string>
+    <string name="category_entertainment">Entertainment</string>
+    <string name="category_healthcare">Healthcare</string>
+    <string name="category_emergencies">Emergencies</string>
+    <string name="category_salary">Salary</string>
+    <string name="category_revenue">Revenue</string>
+    <string name="category_other">Other</string>
+
     <!-- TransactionsUiComposer -->
     <string name="transactions_add_cd">Add transaction</string>
     <string name="transactions_delete_title">Delete transaction?</string>

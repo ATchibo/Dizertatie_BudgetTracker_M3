@@ -7,6 +7,7 @@ import com.tchibolabs.budgettracker.core.data.api.model.TransactionKind
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionPeriod
 import com.tchibolabs.budgettracker.core.data.api.repository.ExchangeRateRepository
 import com.tchibolabs.budgettracker.core.data.api.repository.TransactionRepository
+import com.tchibolabs.budgettracker.core.design.api.components.PieSlice
 import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.CategoryBreakdown
 import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.CurrencyMode
 import com.tchibolabs.budgettracker.core.uicomposers.api.dashboard.DashboardEvent
@@ -15,13 +16,12 @@ import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.Transactio
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListSourceRow
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListUiAdapter
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionListUiAdapterFactory
-import com.tchibolabs.budgettracker.core.uicomposers.api.cutoffMs
+import com.tchibolabs.budgettracker.core.data.api.model.cutoffMs
 import com.tchibolabs.budgettracker.core.uisystem.api.UiAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
+import com.tchibolabs.budgettracker.core.uicomposers.impl.transactionDateFormatter
 import java.time.Instant
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -63,8 +63,6 @@ class DashboardUiAdapter @Inject constructor(
         Color(0xFFEF5350),
     )
 
-    private val dateFormatter: DateTimeFormatter =
-        DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault())
     private val transactionListUiAdapter: TransactionListUiAdapter =
         transactionListUiAdapterFactory.create(TransactionListScope.DASHBOARD)
 
@@ -156,6 +154,8 @@ class DashboardUiAdapter @Inject constructor(
             .map { it.toSourceRow(inputs.currency) }
             .let(transactionListUiAdapter::composeRows)
 
+        val costsBreakdown = expenseItems.toBreakdown()
+        val incomeBreakdown = incomeItems.toBreakdown()
         val model = DashboardUiModel(
             period = inputs.period,
             currency = inputs.currency,
@@ -163,8 +163,10 @@ class DashboardUiAdapter @Inject constructor(
             totalIncome = totalIncome,
             totalCosts = totalCosts,
             totalBalance = totalIncome - totalCosts,
-            costsBreakdown = expenseItems.toBreakdown(),
-            incomeBreakdown = incomeItems.toBreakdown(),
+            costsBreakdown = costsBreakdown,
+            incomeBreakdown = incomeBreakdown,
+            costsSlices = costsBreakdown.toSlices(),
+            incomeSlices = incomeBreakdown.toSlices(),
             topIncome = topIncome,
             topCosts = topCosts,
             openPickerId = inputs.openId,
@@ -191,6 +193,10 @@ class DashboardUiAdapter @Inject constructor(
         return CurrencyMode.ALL_CONVERTED
     }
 
+    private fun List<CategoryBreakdown>.toSlices(): List<PieSlice> = map {
+        PieSlice(label = it.category, value = it.totalAmount.toFloat(), color = it.color)
+    }
+
     private fun List<Pair<Transaction, Double>>.toBreakdown(): List<CategoryBreakdown> =
         groupBy { it.first.category }
             .entries
@@ -214,7 +220,7 @@ class DashboardUiAdapter @Inject constructor(
             id = transaction.id,
             category = transaction.category,
             note = transaction.note,
-            dateLabel = date.format(dateFormatter),
+            dateLabel = date.format(transactionDateFormatter),
             amount = amount,
             currency = displayCurrency.name,
             isIncome = transaction.kind == TransactionKind.Income,

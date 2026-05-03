@@ -1,6 +1,5 @@
-package com.tchibolabs.budgettracker.core.uicomposers.api
+package com.tchibolabs.budgettracker.core.data.api.model
 
-import com.tchibolabs.budgettracker.core.data.api.model.TransactionPeriod
 import java.time.LocalDate
 import java.time.ZoneId
 

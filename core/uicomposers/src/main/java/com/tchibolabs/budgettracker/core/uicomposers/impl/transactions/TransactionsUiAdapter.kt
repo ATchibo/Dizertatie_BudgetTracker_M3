@@ -15,14 +15,13 @@ import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.Transactio
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsEvent
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsFilter
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsUiModel
-import com.tchibolabs.budgettracker.core.uicomposers.api.cutoffMs
+import com.tchibolabs.budgettracker.core.data.api.model.cutoffMs
 import com.tchibolabs.budgettracker.core.uisystem.api.UiAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import com.tchibolabs.budgettracker.core.uicomposers.impl.transactionDateFormatter
 import java.time.Instant
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -43,8 +42,6 @@ class TransactionsUiAdapter @Inject constructor(
     private val openPickerId = MutableStateFlow<String?>(null)
     private val pendingDeleteId = MutableStateFlow<Long?>(null)
 
-    private val dateFormatter: DateTimeFormatter =
-        DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault())
     private val transactionListUiAdapter: TransactionListUiAdapter =
         transactionListUiAdapterFactory.create(TransactionListScope.TRANSACTIONS)
 
@@ -150,7 +147,7 @@ class TransactionsUiAdapter @Inject constructor(
             id = id,
             category = category,
             note = note,
-            dateLabel = date.format(dateFormatter),
+            dateLabel = date.format(transactionDateFormatter),
             amount = amount,
             currency = currency.name,
             isIncome = kind == TransactionKind.Income,

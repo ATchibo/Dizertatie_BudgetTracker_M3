@@ -1,6 +1,7 @@
 package com.tchibolabs.budgettracker.core.uicomposers.api
 
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionPeriod
+import com.tchibolabs.budgettracker.core.data.api.model.cutoffMs
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull

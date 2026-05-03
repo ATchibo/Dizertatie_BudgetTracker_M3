@@ -82,7 +82,7 @@ fun TransactionsFormUiComposer(
             )
             FilterChipCard(
                 label = stringResource(R.string.form_label_category),
-                value = uiModel.category.label.uppercase(),
+                value = uiModel.category.toLabel().uppercase(),
                 onClick = { onEvent(TransactionsFormEvent.OpenCategoryPicker) },
             )
             FilterChipCard(
@@ -133,7 +133,7 @@ fun TransactionsFormUiComposer(
     if (uiModel.isCategoryPickerOpen) {
         OptionsBottomSheet(
             title = stringResource(R.string.form_label_category),
-            options = TransactionCategory.values().map { PickerOption(it.name, it.label) },
+            options = TransactionCategory.values().map { PickerOption(it.name, it.toLabel()) },
             selectedOptionId = uiModel.category.name,
             onSelect = { option ->
                 TransactionCategory.values().firstOrNull { it.name == option.id }?.let {
@@ -220,6 +220,21 @@ private fun DescriptionField(
         ),
         shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
     )
+}
+
+@Composable
+private fun TransactionCategory.toLabel(): String = when (this) {
+    TransactionCategory.GROCERIES -> stringResource(R.string.category_groceries)
+    TransactionCategory.RENT -> stringResource(R.string.category_rent)
+    TransactionCategory.BILLS -> stringResource(R.string.category_bills)
+    TransactionCategory.TRANSPORTATION -> stringResource(R.string.category_transportation)
+    TransactionCategory.SUBSCRIPTIONS -> stringResource(R.string.category_subscriptions)
+    TransactionCategory.ENTERTAINMENT -> stringResource(R.string.category_entertainment)
+    TransactionCategory.HEALTHCARE -> stringResource(R.string.category_healthcare)
+    TransactionCategory.EMERGENCIES -> stringResource(R.string.category_emergencies)
+    TransactionCategory.SALARY -> stringResource(R.string.category_salary)
+    TransactionCategory.REVENUE -> stringResource(R.string.category_revenue)
+    TransactionCategory.OTHER -> stringResource(R.string.category_other)
 }
 
 private fun Long.formatDate(): String =

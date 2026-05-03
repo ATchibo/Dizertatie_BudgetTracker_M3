@@ -14,10 +14,7 @@ enum class TransactionCategory(val isIncome: Boolean) {
     EMERGENCIES(false),
     SALARY(true),
     REVENUE(true),
-    OTHER(false);
-
-    val label: String
-        get() = name.lowercase().replaceFirstChar { it.uppercase() }
+    OTHER(false),
 }
 
 data class TransactionsFormUiModel(

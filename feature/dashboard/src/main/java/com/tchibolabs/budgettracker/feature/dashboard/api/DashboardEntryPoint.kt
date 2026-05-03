@@ -381,6 +381,8 @@ private fun DashboardScreenPreview() {
                     TransactionRow(10, "Rent", null, "1 Mar 2026", "3442.0", "RON", false),
                     TransactionRow(11, "Food", null, "12 Mar 2026", "543.0", "RON", false),
                 ),
+                costsSlices = emptyList(),
+                incomeSlices = emptyList(),
                 openPickerId = null,
                 isLoading = false,
                 isRefreshing = false,

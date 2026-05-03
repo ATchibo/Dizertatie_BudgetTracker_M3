@@ -36,7 +36,6 @@ import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.Transactio
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsEvent
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsFilter
 import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionsUiModel
-import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.label
 
 @Composable
 fun TransactionsUiComposer(
@@ -138,14 +137,14 @@ private fun TransactionsUiComposerPreview() {
                     TransactionsFilter(
                         id = TransactionsFilter.ID_PERIOD,
                         label = "Time Period",
-                        options = TransactionPeriod.values().map { FilterOption(it.name, it.label) },
+                        options = TransactionPeriod.values().map { FilterOption(it.name, it.name) },
                         selectedOptionId = TransactionPeriod.PAST_31_DAYS.name,
                         isPickerOpen = false,
                     ),
                     TransactionsFilter(
                         id = TransactionsFilter.ID_ORDER,
                         label = "Order",
-                        options = TransactionOrder.values().map { FilterOption(it.name, it.label) },
+                        options = TransactionOrder.values().map { FilterOption(it.name, it.name) },
                         selectedOptionId = TransactionOrder.AMOUNT_DESC.name,
                         isPickerOpen = false,
                     ),

@@ -24,6 +24,8 @@ data class DashboardUiModel(
     val totalBalance: Double,
     val costsBreakdown: List<CategoryBreakdown>,
     val incomeBreakdown: List<CategoryBreakdown>,
+    val costsSlices: List<PieSlice>,
+    val incomeSlices: List<PieSlice>,
     val topIncome: List<TransactionRow>,
     val topCosts: List<TransactionRow>,
     val openPickerId: String?,
@@ -31,16 +33,6 @@ data class DashboardUiModel(
     val isRefreshing: Boolean,
 ) : UiModel {
     val displayCurrency: String get() = currency.name
-
-    val costsSlices: List<PieSlice>
-        get() = costsBreakdown.toSlices()
-
-    val incomeSlices: List<PieSlice>
-        get() = incomeBreakdown.toSlices()
-
-    private fun List<CategoryBreakdown>.toSlices(): List<PieSlice> = map {
-        PieSlice(label = it.category, value = it.totalAmount.toFloat(), color = it.color)
-    }
 
     companion object {
         const val PICKER_PERIOD = "period"
@@ -56,6 +48,8 @@ data class DashboardUiModel(
             totalBalance = 0.0,
             costsBreakdown = emptyList(),
             incomeBreakdown = emptyList(),
+            costsSlices = emptyList(),
+            incomeSlices = emptyList(),
             topIncome = emptyList(),
             topCosts = emptyList(),
             openPickerId = null,
