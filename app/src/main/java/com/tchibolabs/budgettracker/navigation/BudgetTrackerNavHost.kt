@@ -1,76 +1,58 @@
 package com.tchibolabs.budgettracker.navigation
 
-import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import com.tchibolabs.budgettracker.core.navigation.api.BudgetRoute
 import com.tchibolabs.budgettracker.core.navigation.api.BudgetTab
+import com.tchibolabs.budgettracker.feature.dashboard.api.DashboardEntryPoint
+import com.tchibolabs.budgettracker.feature.transactions.api.TransactionsEntryPoint
 import com.tchibolabs.budgettracker.feature.transactionsform.api.TransactionsFormEntryPoint
 
-private const val NO_TX_ID = Long.MIN_VALUE
-
 @Composable
-fun BudgetTrackerNavHost(contentPadding: PaddingValues) {
-    var isFormOpen by rememberSaveable { mutableStateOf(false) }
-    var formTransactionId by rememberSaveable { mutableStateOf(NO_TX_ID) }
-    var tab by rememberSaveable { mutableStateOf(BudgetTab.Transactions) }
+fun BudgetTrackerNavHost() {
+    val backStack = rememberNavBackStack(BudgetRoute.Transactions)
 
-    val rootModifier = Modifier
-        .fillMaxSize()
-        .padding(contentPadding)
-
-    val closeForm = {
-        isFormOpen = false
-        formTransactionId = NO_TX_ID
-        tab = BudgetTab.Transactions
-    }
-
-    if (isFormOpen) {
-        BackHandler(onBack = closeForm)
-        TransactionsFormEntryPoint(
-            modifier = rootModifier,
-            transactionId = if (formTransactionId == NO_TX_ID) null else formTransactionId,
-            onNavigate = { target ->
-                when (target) {
-                    is BudgetRoute.TransactionsForm -> {
-                        formTransactionId = target.transactionId ?: NO_TX_ID
-                    }
-                    BudgetRoute.Dashboard -> {
-                        tab = BudgetTab.Dashboard
-                        isFormOpen = false
-                        formTransactionId = NO_TX_ID
-                    }
-                    BudgetRoute.Transactions, BudgetRoute.Home -> {
-                        tab = BudgetTab.Transactions
-                        isFormOpen = false
-                        formTransactionId = NO_TX_ID
-                    }
+    NavDisplay(
+        backStack = backStack,
+        onBack = { backStack.removeLastOrNull() },
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator(),
+        ),
+        entryProvider = entryProvider {
+            entry(BudgetRoute.Transactions) {
+                TabbedShell(
+                    selectedTab = BudgetTab.Transactions,
+                    onSelectTab = { backStack[backStack.lastIndex] = it.toRoute() },
+                ) {
+                    TransactionsEntryPoint(
+                        onNavigate = { if (it is BudgetRoute.TransactionsForm) backStack.add(it) },
+                    )
                 }
-            },
-        )
-    } else {
-        TabbedShell(
-            modifier = rootModifier,
-            selectedTab = tab,
-            onSelectTab = { tab = it },
-            onNavigate = { target ->
-                when (target) {
-                    is BudgetRoute.TransactionsForm -> {
-                        formTransactionId = target.transactionId ?: NO_TX_ID
-                        isFormOpen = true
-                    }
-                    BudgetRoute.Dashboard -> tab = BudgetTab.Dashboard
-                    BudgetRoute.Transactions -> tab = BudgetTab.Transactions
-                    BudgetRoute.Home -> Unit
+            }
+            entry(BudgetRoute.Dashboard) {
+                TabbedShell(
+                    selectedTab = BudgetTab.Dashboard,
+                    onSelectTab = { backStack[backStack.lastIndex] = it.toRoute() },
+                ) {
+                    DashboardEntryPoint()
                 }
-            },
-        )
-    }
+            }
+            entry<BudgetRoute.TransactionsForm> { route ->
+                TransactionsFormEntryPoint(
+                    transactionId = route.transactionId,
+                    onNavigate = { backStack.removeLastOrNull() },
+                )
+            }
+        },
+    )
+}
+
+private fun BudgetTab.toRoute(): BudgetRoute = when (this) {
+    BudgetTab.Transactions -> BudgetRoute.Transactions
+    BudgetTab.Dashboard -> BudgetRoute.Dashboard
 }

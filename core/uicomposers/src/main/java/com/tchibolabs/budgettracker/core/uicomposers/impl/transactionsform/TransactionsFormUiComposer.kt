@@ -1,0 +1,259 @@
+package com.tchibolabs.budgettracker.core.uicomposers.impl.transactionsform
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.tchibolabs.budgettracker.core.data.api.model.Currency
+import com.tchibolabs.budgettracker.core.uicomposers.R
+import com.tchibolabs.budgettracker.core.design.api.components.BudgetTopAppBar
+import com.tchibolabs.budgettracker.core.design.api.components.FilterChipCard
+import com.tchibolabs.budgettracker.core.design.api.components.OptionsBottomSheet
+import com.tchibolabs.budgettracker.core.design.api.components.PickerOption
+import com.tchibolabs.budgettracker.core.design.api.theme.BudgetTrackerTheme
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactionsform.TransactionCategory
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactionsform.TransactionsFormEvent
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactionsform.TransactionsFormUiModel
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+
+private val dateFormatter: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault())
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TransactionsFormUiComposer(
+    uiModel: TransactionsFormUiModel,
+    modifier: Modifier = Modifier,
+    onEvent: (TransactionsFormEvent) -> Unit,
+    onCancel: () -> Unit,
+) {
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = {
+            BudgetTopAppBar(
+                title = if (uiModel.id == null) stringResource(R.string.form_title_add) else stringResource(R.string.form_title_edit),
+                onBack = onCancel,
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background,
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            AmountField(
+                value = uiModel.amountText,
+                onValueChange = { onEvent(TransactionsFormEvent.AmountChanged(it)) },
+            )
+            FilterChipCard(
+                label = stringResource(R.string.form_label_currency),
+                value = uiModel.currency.name,
+                onClick = { onEvent(TransactionsFormEvent.OpenCurrencyPicker) },
+            )
+            FilterChipCard(
+                label = stringResource(R.string.form_label_category),
+                value = uiModel.category.toLabel().uppercase(),
+                onClick = { onEvent(TransactionsFormEvent.OpenCategoryPicker) },
+            )
+            FilterChipCard(
+                label = stringResource(R.string.form_label_date),
+                value = uiModel.occurredAtEpochMs.formatDate(),
+                onClick = { onEvent(TransactionsFormEvent.OpenDatePicker) },
+            )
+            DescriptionField(
+                value = uiModel.description,
+                onValueChange = { onEvent(TransactionsFormEvent.DescriptionChanged(it)) },
+            )
+            Box(modifier = Modifier.padding(top = 8.dp)) {
+                Button(
+                    onClick = { onEvent(TransactionsFormEvent.Save) },
+                    enabled = uiModel.isValid && !uiModel.isSaving,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(28.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
+                ) {
+                    Text(
+                        text = if (uiModel.isSaving) stringResource(R.string.form_button_saving) else stringResource(R.string.form_button_save),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
+            }
+        }
+    }
+
+    if (uiModel.isCurrencyPickerOpen) {
+        OptionsBottomSheet(
+            title = stringResource(R.string.form_label_currency),
+            options = Currency.values().map { PickerOption(it.name, it.name) },
+            selectedOptionId = uiModel.currency.name,
+            onSelect = { option ->
+                Currency.values().firstOrNull { it.name == option.id }?.let {
+                    onEvent(TransactionsFormEvent.CurrencySelected(it))
+                }
+            },
+            onDismiss = { onEvent(TransactionsFormEvent.DismissCurrencyPicker) },
+        )
+    }
+
+    if (uiModel.isCategoryPickerOpen) {
+        OptionsBottomSheet(
+            title = stringResource(R.string.form_label_category),
+            options = TransactionCategory.values().map { PickerOption(it.name, it.toLabel()) },
+            selectedOptionId = uiModel.category.name,
+            onSelect = { option ->
+                TransactionCategory.values().firstOrNull { it.name == option.id }?.let {
+                    onEvent(TransactionsFormEvent.CategorySelected(it))
+                }
+            },
+            onDismiss = { onEvent(TransactionsFormEvent.DismissCategoryPicker) },
+        )
+    }
+
+    if (uiModel.isDatePickerOpen) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = uiModel.occurredAtEpochMs,
+        )
+        DatePickerDialog(
+            onDismissRequest = { onEvent(TransactionsFormEvent.DismissDatePicker) },
+            confirmButton = {
+                TextButton(onClick = {
+                    val picked = datePickerState.selectedDateMillis
+                        ?: uiModel.occurredAtEpochMs
+                    onEvent(TransactionsFormEvent.DateSelected(picked))
+                }) {
+                    Text(stringResource(R.string.form_date_picker_ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onEvent(TransactionsFormEvent.DismissDatePicker) }) {
+                    Text(stringResource(R.string.form_date_picker_cancel))
+                }
+            },
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AmountField(
+    value: String,
+    onValueChange: (String) -> Unit,
+) {
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(buildAmountLabel()) },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        modifier = Modifier.fillMaxWidth(),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
+        shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
+    )
+}
+
+@Composable
+private fun buildAmountLabel(): androidx.compose.ui.text.AnnotatedString {
+    val label = stringResource(R.string.form_label_amount)
+    val color = MaterialTheme.colorScheme.error
+    return androidx.compose.ui.text.buildAnnotatedString {
+        append("$label ")
+        pushStyle(androidx.compose.ui.text.SpanStyle(color = color))
+        append("*")
+        pop()
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DescriptionField(
+    value: String,
+    onValueChange: (String) -> Unit,
+) {
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(stringResource(R.string.form_label_description)) },
+        modifier = Modifier.fillMaxWidth(),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
+        shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
+    )
+}
+
+@Composable
+private fun TransactionCategory.toLabel(): String = when (this) {
+    TransactionCategory.GROCERIES -> stringResource(R.string.category_groceries)
+    TransactionCategory.RENT -> stringResource(R.string.category_rent)
+    TransactionCategory.BILLS -> stringResource(R.string.category_bills)
+    TransactionCategory.TRANSPORTATION -> stringResource(R.string.category_transportation)
+    TransactionCategory.SUBSCRIPTIONS -> stringResource(R.string.category_subscriptions)
+    TransactionCategory.ENTERTAINMENT -> stringResource(R.string.category_entertainment)
+    TransactionCategory.HEALTHCARE -> stringResource(R.string.category_healthcare)
+    TransactionCategory.EMERGENCIES -> stringResource(R.string.category_emergencies)
+    TransactionCategory.SALARY -> stringResource(R.string.category_salary)
+    TransactionCategory.REVENUE -> stringResource(R.string.category_revenue)
+    TransactionCategory.OTHER -> stringResource(R.string.category_other)
+}
+
+private fun Long.formatDate(): String =
+    Instant.ofEpochMilli(this)
+        .atZone(ZoneId.systemDefault())
+        .toLocalDate()
+        .format(dateFormatter)
+
+@Preview
+@Composable
+private fun TransactionsFormUiComposerPreview() {
+    BudgetTrackerTheme {
+        TransactionsFormUiComposer(
+            uiModel = TransactionsFormUiModel.Initial.copy(
+                amountText = "1000",
+                description = "Fix water pipes",
+            ),
+            onEvent = {},
+            onCancel = {},
+        )
+    }
+}

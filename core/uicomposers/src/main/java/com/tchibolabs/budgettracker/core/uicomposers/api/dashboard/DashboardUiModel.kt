@@ -4,38 +4,15 @@ import androidx.compose.ui.graphics.Color
 import com.tchibolabs.budgettracker.core.data.api.model.Currency
 import com.tchibolabs.budgettracker.core.data.api.model.TransactionPeriod
 import com.tchibolabs.budgettracker.core.design.api.components.PieSlice
+import com.tchibolabs.budgettracker.core.uicomposers.api.transactions.TransactionRow
 import com.tchibolabs.budgettracker.core.uisystem.api.UiModel
 
 enum class CurrencyMode { SELECTED_ONLY, ALL_CONVERTED }
-
-val CurrencyMode.label: String
-    get() = when (this) {
-        CurrencyMode.SELECTED_ONLY -> "Selected only"
-        CurrencyMode.ALL_CONVERTED -> "All (converted)"
-    }
-
-val TransactionPeriod.dashboardLabel: String
-    get() = when (this) {
-        TransactionPeriod.TODAY -> "Today"
-        TransactionPeriod.PAST_7_DAYS -> "Past 7 days"
-        TransactionPeriod.PAST_31_DAYS -> "Past 31 days"
-        TransactionPeriod.PAST_YEAR -> "Past year"
-        TransactionPeriod.CURRENT_MONTH -> "Current month"
-        TransactionPeriod.ALL_TIME -> "All time"
-    }
 
 data class CategoryBreakdown(
     val category: String,
     val totalAmount: Double,
     val color: Color,
-)
-
-data class DashboardTransactionRow(
-    val id: Long,
-    val category: String,
-    val dateLabel: String,
-    val amountText: String,
-    val currency: String,
 )
 
 data class DashboardUiModel(
@@ -47,23 +24,15 @@ data class DashboardUiModel(
     val totalBalance: Double,
     val costsBreakdown: List<CategoryBreakdown>,
     val incomeBreakdown: List<CategoryBreakdown>,
-    val topIncome: List<DashboardTransactionRow>,
-    val topCosts: List<DashboardTransactionRow>,
+    val costsSlices: List<PieSlice>,
+    val incomeSlices: List<PieSlice>,
+    val topIncome: List<TransactionRow>,
+    val topCosts: List<TransactionRow>,
     val openPickerId: String?,
     val isLoading: Boolean,
     val isRefreshing: Boolean,
 ) : UiModel {
     val displayCurrency: String get() = currency.name
-
-    val costsSlices: List<PieSlice>
-        get() = costsBreakdown.toSlices()
-
-    val incomeSlices: List<PieSlice>
-        get() = incomeBreakdown.toSlices()
-
-    private fun List<CategoryBreakdown>.toSlices(): List<PieSlice> = map {
-        PieSlice(label = it.category, value = it.totalAmount.toFloat(), color = it.color)
-    }
 
     companion object {
         const val PICKER_PERIOD = "period"
@@ -79,6 +48,8 @@ data class DashboardUiModel(
             totalBalance = 0.0,
             costsBreakdown = emptyList(),
             incomeBreakdown = emptyList(),
+            costsSlices = emptyList(),
+            incomeSlices = emptyList(),
             topIncome = emptyList(),
             topCosts = emptyList(),
             openPickerId = null,

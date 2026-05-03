@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TransactionsFormUiComposer -->
+    <string name="form_title_add">Add Transaction</string>
+    <string name="form_title_edit">Edit Transaction</string>
+    <string name="form_label_currency">Currency</string>
+    <string name="form_label_category">Category</string>
+    <string name="form_label_date">Date</string>
+    <string name="form_label_description">Description</string>
+    <string name="form_label_amount">Amount</string>
+    <string name="form_button_saving">Saving…</string>
+    <string name="form_button_save">Save</string>
+    <string name="form_date_picker_ok">OK</string>
+    <string name="form_date_picker_cancel">Cancel</string>
+
+    <!-- TransactionListUiComposer -->
+    <string name="transactions_empty_message">No transactions found</string>
+
+    <!-- TransactionsUiAdapter filter headers -->
+    <string name="transactions_filter_period_label">Time Period</string>
+    <string name="transactions_filter_order_label">Order</string>
+
+    <!-- TransactionPeriod labels (shared) -->
+    <string name="period_today">Today</string>
+    <string name="period_past_7_days">Past 7 days</string>
+    <string name="period_past_31_days">Past 31 days</string>
+    <string name="period_past_year">Past year</string>
+    <string name="period_current_month">Current month</string>
+    <string name="period_all_time">All time</string>
+
+    <!-- TransactionOrder labels -->
+    <string name="order_date_oldest_first">Date (Oldest first)</string>
+    <string name="order_date_newest_first">Date (Newest first)</string>
+    <string name="order_amount_ascending">Amount (Ascending)</string>
+    <string name="order_amount_descending">Amount (Descending)</string>
+
+    <!-- TransactionCategory labels -->
+    <string name="category_groceries">Groceries</string>
+    <string name="category_rent">Rent</string>
+    <string name="category_bills">Bills</string>
+    <string name="category_transportation">Transportation</string>
+    <string name="category_subscriptions">Subscriptions</string>
+    <string name="category_entertainment">Entertainment</string>
+    <string name="category_healthcare">Healthcare</string>
+    <string name="category_emergencies">Emergencies</string>
+    <string name="category_salary">Salary</string>
+    <string name="category_revenue">Revenue</string>
+    <string name="category_other">Other</string>
+
+    <!-- TransactionsUiComposer -->
+    <string name="transactions_add_cd">Add transaction</string>
+    <string name="transactions_delete_title">Delete transaction?</string>
+    <string name="transactions_delete_message">This action cannot be undone.</string>
+    <string name="transactions_delete_confirm">Delete</string>
+    <string name="transactions_delete_cancel">Cancel</string>
+</resources>

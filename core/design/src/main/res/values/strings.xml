@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="transaction_card_edit_cd">Edit</string>
+    <string name="transaction_card_delete_cd">Delete</string>
+    <string name="top_app_bar_back_cd">Back</string>
+</resources>

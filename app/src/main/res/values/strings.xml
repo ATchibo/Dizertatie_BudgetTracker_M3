@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">BudgetTracker</string>
+    <string name="tab_transactions">Transactions</string>
+    <string name="tab_dashboard">Dashboard</string>
 </resources>

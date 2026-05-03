@@ -1,36 +1,6 @@
 package com.tchibolabs.budgettracker.core.uicomposers.api.transactions
 
-import com.tchibolabs.budgettracker.core.data.api.model.TransactionOrder
-import com.tchibolabs.budgettracker.core.data.api.model.TransactionPeriod
 import com.tchibolabs.budgettracker.core.uisystem.api.UiModel
-
-val TransactionPeriod.label: String
-    get() = when (this) {
-        TransactionPeriod.TODAY -> "Today"
-        TransactionPeriod.PAST_7_DAYS -> "Past 7 days"
-        TransactionPeriod.PAST_31_DAYS -> "Past 31 days"
-        TransactionPeriod.PAST_YEAR -> "Past year"
-        TransactionPeriod.CURRENT_MONTH -> "Current month"
-        TransactionPeriod.ALL_TIME -> "All time"
-    }
-
-val TransactionOrder.label: String
-    get() = when (this) {
-        TransactionOrder.DATE_ASC -> "Date (Oldest first)"
-        TransactionOrder.DATE_DESC -> "Date (Newest first)"
-        TransactionOrder.AMOUNT_ASC -> "Amount (Ascending)"
-        TransactionOrder.AMOUNT_DESC -> "Amount (Descending)"
-    }
-
-data class TransactionRow(
-    val id: Long,
-    val category: String,
-    val note: String?,
-    val dateLabel: String,
-    val amountText: String,
-    val currency: String,
-    val isIncome: Boolean,
-)
 
 data class FilterOption(
     val id: String,
