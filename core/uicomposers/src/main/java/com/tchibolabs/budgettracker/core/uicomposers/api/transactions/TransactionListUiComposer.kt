@@ -3,8 +3,6 @@ package com.tchibolabs.budgettracker.core.uicomposers.api.transactions
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,22 +41,17 @@ fun TransactionListUiComposer(
             )
             return@Column
         }
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            userScrollEnabled = false,
-        ) {
-            items(rows, key = { it.id }) { row ->
-                TransactionCard(
-                    category = row.category,
-                    note = row.note,
-                    dateLabel = row.dateLabel,
-                    amountText = row.amountText,
-                    currency = row.currency,
-                    onClick = { onRowClick?.invoke(row.id) },
-                    onEdit = onRowEdit?.let { { it(row.id) } },
-                    onDelete = onRowDelete?.let { { it(row.id) } },
-                )
-            }
+        rows.forEach { row ->
+            TransactionCard(
+                category = row.category,
+                note = row.note,
+                dateLabel = row.dateLabel,
+                amountText = row.amountText,
+                currency = row.currency,
+                onClick = { onRowClick?.invoke(row.id) },
+                onEdit = onRowEdit?.let { { it(row.id) } },
+                onDelete = onRowDelete?.let { { it(row.id) } },
+            )
         }
     }
 }

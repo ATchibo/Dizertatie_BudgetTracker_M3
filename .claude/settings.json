@@ -77,7 +77,8 @@
       "Bash(./gradlew :core:uicomposers:testDebugUnitTest --rerun-tasks)",
       "Bash(bc)",
       "Bash(grep -n \"[0-9]\\\\{3,\\\\}\\\\|[0-9_]\\\\{5,\\\\}\\\\\\\\|\\\\\"[a-zA-Z].*\\\\\"\" /home/tchibo/AndroidStudioProjects/BudgetTrackerFull/core/uicomposers/src/main/java/com/tchibolabs/budgettracker/core/uicomposers/impl/dashboard/DashboardUiAdapter.kt)",
-      "Bash(./gradlew :core:uicomposers:compileDebugKotlin :feature:dashboard:compileDebugKotlin :feature:transactions:compileDebugKotlin)"
+      "Bash(./gradlew :core:uicomposers:compileDebugKotlin :feature:dashboard:compileDebugKotlin :feature:transactions:compileDebugKotlin)",
+      "Bash(adb logcat *)"
     ]
   }
 }
